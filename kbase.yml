@@ -13,3 +13,5 @@ module-version:
 owners:
     [kazakov]
 
+data-version:
+    1.0

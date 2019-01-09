@@ -2,6 +2,7 @@
 import os
 import time
 import unittest
+from subprocess import Popen, PIPE, CalledProcessError
 from configparser import ConfigParser
 
 from FamaProfiling.FamaProfilingImpl import FamaProfiling
@@ -9,6 +10,7 @@ from FamaProfiling.FamaProfilingServer import MethodContext
 from FamaProfiling.authclient import KBaseAuth as _KBaseAuth
 
 from installed_clients.WorkspaceClient import Workspace
+from installed_clients.ReadsUtilsClient import ReadsUtils
 
 
 class FamaProfilingTest(unittest.TestCase):
@@ -68,10 +70,38 @@ class FamaProfilingTest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
+    def test_fama_profiling(self):
+
+        wd = os.getcwd()
+        os.chdir(self.scratch)
+        with Popen(['curl','-LO','http://iseq.lbl.gov/mydocs/fama_downloads/test_fastq_pe1.fq'], stdout=PIPE, bufsize=1, universal_newlines=True) as p:
+            for line in p.stdout:
+                print(line, end='')
+        if p.returncode != 0:
+            raise CalledProcessError(p.returncode, p.args)
+
+        with Popen(['curl','-LO','http://iseq.lbl.gov/mydocs/fama_downloads/test_fastq_pe2.fq'], stdout=PIPE, bufsize=1, universal_newlines=True) as p:
+            for line in p.stdout:
+                print(line, end='')
+        if p.returncode != 0:
+            raise CalledProcessError(p.returncode, p.args)
+        
+        #time.sleep(3.0)
+        os.chdir(wd)
+        
+        ru = ReadsUtils(self.callback_url)
+        reads_params = {'fwd_file': os.path.join(self.scratch, 'test_fastq_pe1.fq'),
+                        'rev_file': os.path.join(self.scratch, 'test_fastq_pe2.fq'),
+                        'sequencing_tech': 'Illumina',
+                        'wsname': self.getWsName(),
+                        'name': 'Fama_test_input',
+                        'interleaved': 'false'
+                        }
+
+        ru_ret = ru.upload_reads(reads_params)
         # Prepare test objects in workspace if needed using
         # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
+        #                                 'objects': []})
         #
         # Run your method by
         # ret = self.getImpl().your_method(self.getContext(), parameters...)
@@ -79,4 +109,8 @@ class FamaProfilingTest(unittest.TestCase):
         # Check returned data with
         # self.assertEqual(ret[...], ...) or other unittest methods
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
-                                                                    'parameter_1': 'Hello World!'})
+                                                                    'read_library_ref': ru_ret['obj_ref'],
+                                                                    'output_read_library_name': 'Fama_test_output'})
+        print ('Report name', ret[0]['report_name'])
+        print ('Report reference', ret[0]['report_ref'])
+        

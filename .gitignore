@@ -1,2 +1,5 @@
 test_local
 sdk.cfg
+__pycache__/
+*.pyc
+*.py.bak*
