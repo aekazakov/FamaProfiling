@@ -12,6 +12,8 @@ def run_ref_search(parser):
     print ('Starting DIAMOND')
     diamond_args = ['/kb/deployment/bin/diamond/diamond',
                     'blastx',
+                    '-b',
+                    '1.0',
                     '--db',
                     parser.config.get_reference_diamond_db(parser.project.get_collection(parser.sample)),
                     '--query',
@@ -37,6 +39,8 @@ def run_bgr_search(parser):
     print ('Starting DIAMOND')
     diamond_args = ['/kb/deployment/bin/diamond/diamond',
                     'blastx',
+                    '-b',
+                    '1.0',
                     '--db',
                     parser.config.get_background_diamond_db(parser.project.get_collection(parser.sample)),
                     '--query',
