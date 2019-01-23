@@ -23,6 +23,7 @@ RUN mkdir -p /kb/deployment/bin/diamond && \
 
 RUN /kb/deployment/bin/diamond/diamond version
 
+RUN apt-get -y install time
 # -----------------------------------------
 
 COPY ./ /kb/module

@@ -10,7 +10,8 @@ from Fama.Report import generate_html_report
 
 def run_ref_search(parser):
     print ('Starting DIAMOND')
-    diamond_args = ['/kb/deployment/bin/diamond/diamond',
+    diamond_args = ['/usr/bin/time', '-v',
+                    '/kb/deployment/bin/diamond/diamond',
                     'blastx',
                     '-b', '1.0', '--tmpdir', '/dev/shm',
                     '--db',
@@ -36,7 +37,8 @@ def run_ref_search(parser):
 
 def run_bgr_search(parser):
     print ('Starting DIAMOND')
-    diamond_args = ['/kb/deployment/bin/diamond/diamond',
+    diamond_args = ['/usr/bin/time', '-v',
+                    '/kb/deployment/bin/diamond/diamond',
                     'blastx',
                     '-b', '1.0', '--tmpdir', '/dev/shm',
                     '--db',
