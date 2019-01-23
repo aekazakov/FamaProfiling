@@ -4,7 +4,7 @@
         "kazakov"
     ],
     "contact": "",
-    "categories": ["active"],
+    "categories": ["active","communities"],
     "widgets": {
         "input": null,
         "output": null
