@@ -7,7 +7,7 @@ MAINTAINER KBase Developer
 # installation scripts.
 
 RUN apt-get update && \
-    apt-get -y install g++ gcc zlib1g libz-dev
+    apt-get -y install automake build-essential zlib1g libz-dev
 
 # Install DIAMOND 
 
