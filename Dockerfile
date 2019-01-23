@@ -14,7 +14,7 @@ RUN apt-get update && \
 RUN mkdir -p /kb/deployment/bin/diamond && \
     git clone https://github.com/bbuchfink/diamond.git && \
     cd diamond && \
-    git checkout 91a916c530dd2623260318f5c86b8011b6f57580 . && \
+    git checkout e186f17 . && \
     sed 's/g++/g++ -std=c++11/' build_simple.sh > tmp && \
     chmod u+x tmp && \
     mv tmp rebuild_simple.sh && \
