@@ -8,139 +8,168 @@ ENDS = ['pe1','pe2']
 def generate_html_report(outfile, parsers):
     
     with open (outfile, 'w') as of:
-        of.write('<!doctype html><html>\n<head>\n<title>Fama report</title>\n</head>\n<body>\n')
-        of.write('<h1>Fama report</h1>\n')
+
+
+        of.write('<html>\n')
+        of.write('    <head>\n')
+        of.write('        <title>Fama report</title>\n')
+        of.write('        <!-- Compiled and minified CSS -->\n')
+        of.write('        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">\n')
+        of.write('        <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">\n')
+        of.write('    </head>\n')
+        of.write('    <body>\n')
+        of.write('        <header class="page-header">\n')
+        of.write('            <h2>Fama report</h2>\n')
+        of.write('        </header>\n')
+
+        
+        stats = defaultdict(dict)
+        func_stats = autovivify(2,float)
+        func_counts = autovivify(2,int)
+        func_identity = autovivify(2,float)
+        func_hit_counts = autovivify(2,int)
+        function_dict = {}
 
         for parser in parsers:
-
-
-            # Write general info
-            of.write('\n<h3>Run info</h3>\n')
-            of.write('<p>Sample ID: ' + parser.project.get_sample_id(parser.sample) + '</p>\n')
-            of.write('<p>Paired end: ' + parser.end + '</p>\n')
-            of.write('<p>FASTQ file: ' + parser.project.get_fastq_path(parser.sample, parser.end) + '</p>\n')
-            of.write('<p>Total number of reads:' + str(parser.project.get_fastq1_readcount(parser.sample)) + '</p>\n')
-
-            # Write read statistics
-            of.write('<h3>Read statistics</h3>\n')
+            stats[parser.end]['reads_total'] = str(parser.project.get_fastq1_readcount(parser.sample))
             read_stats = Counter()
             for read in sorted(parser.reads.keys()):
                 read_stats[parser.reads[read].get_status()] += 1
-            for status in OrderedDict(read_stats.most_common()):
-                if status == 'unaccounted':
-                    of.write('<p>Reads missing from background DB search result: ' + str(read_stats[status]) + '</p>\n')
-                elif status == 'nofunction':
-                    of.write('<p>Reads not mapped to any function: ' + str(read_stats[status]) + '</p>\n')
-                elif status == 'function':
-                    of.write('<p>Reads mapped to a function of interest: ' + str(read_stats[status]) + '</p>\n')
+            stats[parser.end]['reads_mapped'] = str(read_stats['function'])
+
+            for read in parser.reads.keys():
+                if parser.reads[read].get_status() == 'function':
+                    functions = parser.reads[read].get_functions()
+                    for function in functions:
+                        function_dict[function] = True
+                        func_stats[parser.end][function] += functions[function]
+                        func_counts[parser.end][function] += 1/len(functions)
+                    for hit in parser.reads[read].get_hit_list().get_hits():
+                        for function in hit.get_functions():
+                            func_identity[parser.end][function] += hit.get_identity()
+                            func_hit_counts[parser.end][function] += 1
+            for function in func_identity[parser.end]:
+                func_identity[parser.end][function] = func_identity[parser.end][function]/func_hit_counts[parser.end][function]
+
+        of.write('\n    <h3>Run info</h3>\n')
+
+        of.write('            <table>\n')
+        of.write('                <thead>\n')
+        of.write('                            <tr>\n')
+        of.write('                                <th>&nbsp;</th>\n')
+        for parser in parsers:
+            of.write('                                <th>' + parser.end + ' </th>\n')
+
+        of.write('                </tr>\n')
+        of.write('            </thead>\n')
+        of.write('            <tbody>\n')
+        of.write('                    <tr>\n')
+        of.write('                          <td>Reads, total</td>\n')
+        for parser in parsers:
+            of.write('                                <td>' + str(stats[parser.end]['reads_total']) + '</td>\n')
+        of.write('                    </tr>\n')
+        of.write('                    <tr>\n')
+        of.write('                          <td>Reads, mapped</td>\n')
+        for parser in parsers:
+            of.write('                                <td>' + str(stats[parser.end]['reads_total']) + '</td>\n')
+        of.write('                    </tr>\n')
+        of.write('            </tbody>\n')
+        of.write('        </table>\n')
+
+
+        of.write('\n    <h3>Functional profile</h3>\n')
+
+        of.write('            <table>\n')
+        of.write('                <thead>\n')
+        of.write('                            <tr>\n')
+        of.write('                                <th>Fucntion</th>\n')
+        for parser in parsers:
+            of.write('                                <th>Score, ' + parser.end + '</th>\n')
+            of.write('                                <th>Read count, ' + parser.end + '</th>\n')
+            of.write('                                <th>Aver. % identity' + parser.end + '</th>\n')
+
+        of.write('                </tr>\n')
+        of.write('            </thead>\n')
+        of.write('            <tbody>\n')
+        for function in sorted(function_dict.keys()):
+            of.write('                    <tr>\n')
+            of.write('                          <td>' + function + '</td>\n')
+            for parser in parsers:
+                if function in func_stats[parser.end]:
+                    of.write('                                <td>' + '{0:.5f}'.format(func_stats[parser.end][function]) + '</td>\n')
                 else:
-                    of.write('<p>' + status + ': ' + str(read_stats[status]) + '</p>\n')
-            
-            of.write('<h3>Function statistics</h3>\n')
-            func_stats = defaultdict(float)
-            func_counts = Counter()
-            func_identity = defaultdict(float)
-            func_hit_counts = Counter()
+                    of.write('                                <td>N/A</td>\n')
+                if function in func_counts[parser.end]:
+                    of.write('                                <td>' + '{0:.0f}'.format(func_counts[parser.end][function]) + '</td>\n')
+                else:
+                    of.write('                                <td>0</td>\n')
+                if function in func_identity[parser.end]:
+                    of.write('                                <td>' + '{0:.2f}'.format(func_identity[parser.end][function]) + '%</td>\n')
+                else:
+                    of.write('                                <td>N/A</td>\n')
+            of.write('                    </tr>\n')
+
+        of.write('            </tbody>\n')
+        of.write('        </table>\n')
+
+
+
+        # Write group scores
+        of.write('\n        <h3>Function statistics by category</h3>\n')
+        func_stats = autovivify(2,float)
+        func_counts = autovivify(2,int)
+        func_identity = autovivify(2,float)
+        func_hit_counts = autovivify(2,int)
+        for parser in parsers:
             for read in parser.reads.keys():
-                if parser.reads[read].get_status() == 'function,besthit' or parser.reads[read].get_status() == 'function':
+                if parser.reads[read].get_status() == 'function':
                     functions = parser.reads[read].get_functions()
                     for function in functions:
-                        func_stats[function] += functions[function]
-                        func_counts[function] += 1/len(functions)
+                        func_stats[parser.end][parser.ref_data.lookup_function_group(function)] += functions[function]
+                        func_counts[parser.end][parser.ref_data.lookup_function_group(function)] += 1/len(functions)
                     for hit in parser.reads[read].get_hit_list().get_hits():
                         for function in hit.get_functions():
-                            func_identity[function] += hit.get_identity()
-                            func_hit_counts[function] += 1
-            for function in func_identity:
-                func_identity[function] = func_identity[function]/func_hit_counts[function]
-            of.write('<table>\n')
-            of.write('<tr><td>Function</td><td>Definition</td><td>RPKM score</td><td>Read count</td><td>Avg. identity</td></tr>\n')
-            for function in sorted(func_stats.keys()):
-                of.write('<tr><td>' + function + '</td><td>' 
-                        + parser.ref_data.lookup_function_name(function) + '</td><td>' 
-                        + str(func_stats[function]) + '</td><td>'
-                        + str(func_counts[function]) + '</td><td>'
-                        + str(func_identity[function]) + '</td></tr>\n')
-            of.write('</table>\n')
+                            func_identity[parser.end][parser.ref_data.lookup_function_group(function)] += hit.get_identity()
+                            func_hit_counts[parser.end][parser.ref_data.lookup_function_group(function)] += 1
+            for function in func_identity[parser.end]:
+                func_identity[parser.end][function] = func_identity[parser.end][function]/func_hit_counts[parser.end][function]
 
-            # Write group scores
-            of.write('<H3>Function statistics by category</H3>\n')
-            func_stats = defaultdict(float)
-            func_counts = Counter()
-            func_identity = defaultdict(float)
-            func_hit_counts = Counter()
-            for read in parser.reads.keys():
-                if parser.reads[read].get_status() == 'function,besthit' or parser.reads[read].get_status() == 'function':
-                    functions = parser.reads[read].get_functions()
-                    for function in functions:
-                        func_stats[parser.ref_data.lookup_function_group(function)] += functions[function]
-                        func_counts[parser.ref_data.lookup_function_group(function)] += 1/len(functions)
-                    for hit in parser.reads[read].get_hit_list().get_hits():
-                        for function in hit.get_functions():
-                            func_identity[parser.ref_data.lookup_function_group(function)] += hit.get_identity()
-                            func_hit_counts[parser.ref_data.lookup_function_group(function)] += 1
-            for function in func_identity:
-                func_identity[function] = func_identity[function]/func_hit_counts[function]
-            of.write('<table>\n')
-            of.write('<tr><td>Category</td><td>RPKM score</td><td>Read count</td><td>Avg. identity</td></tr>\n')
-            for function in sorted(func_stats.keys()):
-                of.write('<tr><td>' + function + '</td><td>' 
-                        + str(func_stats[function]) + '</td><td>'
-                        + str(func_counts[function]) + '</td><td>'
-                        + str(func_identity[function]) + '</td></tr>\n')
-            of.write('</table>\n')
 
-            # Write taxonomy stats
-            of.write('<h3>Taxonomy statistics for best hits</h3>\n')
-            tax_stats = Counter()
-            identity_stats = defaultdict(float)
-            rpkm_stats = defaultdict(float)
-            for read in parser.reads.keys():
-    #            print (read, parser.reads[read].get_status())
-                if parser.reads[read].get_status() == 'function,besthit' or parser.reads[read].get_status() == 'function':
-    #            if parser.reads[read].get_status() == 'function':
-    #                print ('\t',parser.reads[read].get_status())
-                    hits = parser.reads[read].get_hit_list().get_hits()
-                    for hit in hits:
-    #                    print (hit.get_subject_id())
-    #                    print (parser.ref_data.lookup_protein_tax(cleanup_protein_id(hit.get_subject_id())))
-    #                    print (hit.get_identity())
-                        protein_taxid = parser.ref_data.lookup_protein_tax(cleanup_protein_id(hit.get_subject_id()))
-                        tax_stats[protein_taxid] += 1
-                        identity_stats[protein_taxid] += hit.get_identity()
-                    if len(hits) == 1:
-                        read_functions = parser.reads[read].get_functions()
-                        for function in read_functions:
-                            rpkm_stats[parser.ref_data.lookup_protein_tax(cleanup_protein_id(hits[0].get_subject_id()))] += read_functions[function]
-                    else:
-                        read_functions = parser.reads[read].get_functions()
-                        protein_taxids = {}
-                        for hit in hits:
-                            hit_taxid = parser.ref_data.lookup_protein_tax(cleanup_protein_id(hit.get_subject_id()))
-                            hit_functions = hit.get_functions()
-                            for hit_function in hit_functions:
-                                protein_taxids[hit_taxid] = hit_function
-                        for taxid in protein_taxids:
-                            if protein_taxids[taxid] in read_functions:
-                                rpkm_stats[taxid] += read_functions[protein_taxids[taxid]]
-                            
-            tax_data = parser.taxonomy_data
-            counts_per_rank, identity_per_rank, rpkm_per_rank = tax_data.get_taxonomy_profile(counts=tax_stats, identity=identity_stats, scores = rpkm_stats)
+        of.write('            <table>\n')
+        of.write('                <thead>\n')
+        of.write('                            <tr>\n')
+        of.write('                                <th>Category</th>\n')
+        for parser in parsers:
+            of.write('                                <th>Score, ' + parser.end + '</th>\n')
+            of.write('                                <th>Read count, ' + parser.end + '</th>\n')
+            of.write('                                <th>Aver. % identity' + parser.end + '</th>\n')
 
-            ranks = ['superkingdom', 'phylum', 'class', 'order', 'family', 'genus']
-            for rank in ranks:
-                of.write('<h5>Taxonomy report for rank ' + rank + '</h5>\n')
-                of.write('<table>\n')
-                of.write('<tr><td>Taxon</td><td>Read count</td><td>RPKM score</td><td>Average identity</td></tr>\n')
-                
-                for tax in OrderedDict(Counter(counts_per_rank[rank]).most_common()):
-                    #print (tax + '\t' + str(counts_per_rank[rank][tax]) + '\t' + str(identity_per_rank[rank][tax]))
-                    of.write('<tr><td>' + rank + '</td><td>' + tax + '</td><td>' 
-                            + str(counts_per_rank[rank][tax]) + '</td><td>' 
-                            + str(rpkm_per_rank[rank][tax]) + '</td><td>' 
-                            + str(identity_per_rank[rank][tax]) + '</td></tr>\n')
-                of.write('</table>\n')
-            of.write('<hr>\n')
+        of.write('                </tr>\n')
+        of.write('            </thead>\n')
+        of.write('            <tbody>\n')
+        for function in sorted(function_dict.keys()):
+            of.write('                    <tr>\n')
+            of.write('                          <td>' + function + '</td>\n')
+            for parser in parsers:
+                if function in func_stats[parser.end]:
+                    of.write('                                <td>' + '{0:.5f}'.format(func_stats[parser.end][function]) + '</td>\n')
+                else:
+                    of.write('                                <td>N/A</td>\n')
+                if function in func_counts[parser.end]:
+                    of.write('                                <td>' + '{0:.0f}'.format(func_counts[parser.end][function]) + '</td>\n')
+                else:
+                    of.write('                                <td>0</td>\n')
+                if function in func_identity[parser.end]:
+                    of.write('                                <td>' + '{0:.2f}'.format(func_identity[parser.end][function]) + '%</td>\n')
+                else:
+                    of.write('                                <td>N/A</td>\n')
+            of.write('                    </tr>\n')
+
+        of.write('            </tbody>\n')
+        of.write('        </table>\n')
+
+
+
 
         of.write('<p>End of report</p>\n')
         of.write('</body>\n</html>\n')
