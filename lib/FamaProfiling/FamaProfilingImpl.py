@@ -2,6 +2,7 @@
 #BEGIN_HEADER
 import os
 import uuid
+import time
 from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
@@ -31,7 +32,7 @@ class FamaProfiling:
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
-        print(('\n' if prefix_newline else '') + str(_time.time()) + ': ' + message)
+        print(('\n' if prefix_newline else '') + str(time.time()) + ': ' + message)
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -121,7 +122,7 @@ class FamaProfiling:
         report = KBaseReport(self.callback_url)
         report_info = report.create_extended_report(report_params)
         report_info['report_params'] = report_params
-        self.log(report_output)
+        self.log(str(report_info))
         output = {
             'report_name': report_info['name'],
             'report_ref': report_info['ref'],
