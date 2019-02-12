@@ -93,7 +93,7 @@ class FamaProfiling:
         output_reads_ref = ru_ret['obj_ref']
 
         # Write HTML output to workspace
-        text_report = 'Here Fama would provide some output'
+        message = 'Fama functional profiling finished successfully'
         
         dfu = DataFileUtil(self.callback_url)
         try:
@@ -107,16 +107,21 @@ class FamaProfiling:
             raise
 
         # Save report
+        report_params = {'message': message,
+                         'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'}],
+                         'direct_html_link_index': 0,
+                         'html_links': [{'shock_id': dfu_output['shock_id'],
+                                         'path': out_report,
+                                         'name': 'fama_report.html',
+                                         'label': 'Fama_report'}
+                                         ],
+                         'report_object_name': 'fama_profiling_report_' + str(uuid.uuid4()),
+                         'workspace_name': params['workspace_name'],
+                         'html_window_height': 460}
         report = KBaseReport(self.callback_url)
-        report_info = report.create_extended_report({'message': text_report,
-                                                'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'}],
-                                                'direct_html_link_index': 0,
-                                                'html_links': [{'shock_id': dfu_output['shock_id'],
-                                                                'name': 'report.html',
-                                                                'label': 'Fama report'}
-                                                                ],
-                                                'report_object_name': 'fama_report_' + str(uuid.uuid4()),
-                                                'workspace_name': params['workspace_name']})
+        report_info = report.create_extended_report(report_params)
+        report_info['report_params'] = report_params
+        self.log(report_output)
         output = {
             'report_name': report_info['name'],
             'report_ref': report_info['ref'],
