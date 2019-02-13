@@ -71,7 +71,7 @@ def generate_html_report(outfile, parsers):
         of.write('                    <tr>\n')
         of.write('                          <td>Reads, mapped</td>\n')
         for parser in parsers:
-            of.write('                                <td>' + str(stats[parser.end]['reads_total']) + '</td>\n')
+            of.write('                                <td>' + str(stats[parser.end]['reads_mapped']) + '</td>\n')
         of.write('                    </tr>\n')
         of.write('            </tbody>\n')
         of.write('        </table>\n')
@@ -86,7 +86,7 @@ def generate_html_report(outfile, parsers):
         for parser in parsers:
             of.write('                                <th>Score, ' + parser.end + '</th>\n')
             of.write('                                <th>Read count, ' + parser.end + '</th>\n')
-            of.write('                                <th>Aver. % identity' + parser.end + '</th>\n')
+            of.write('                                <th>Aver. % identity, ' + parser.end + '</th>\n')
 
         of.write('                </tr>\n')
         of.write('            </thead>\n')
@@ -120,11 +120,13 @@ def generate_html_report(outfile, parsers):
         func_counts = autovivify(2,int)
         func_identity = autovivify(2,float)
         func_hit_counts = autovivify(2,int)
+        categories_dict = {}
         for parser in parsers:
             for read in parser.reads.keys():
                 if parser.reads[read].get_status() == 'function':
                     functions = parser.reads[read].get_functions()
                     for function in functions:
+                        categories_dict[parser.ref_data.lookup_function_group(function)] = True
                         func_stats[parser.end][parser.ref_data.lookup_function_group(function)] += functions[function]
                         func_counts[parser.end][parser.ref_data.lookup_function_group(function)] += 1/len(functions)
                     for hit in parser.reads[read].get_hit_list().get_hits():
@@ -147,7 +149,7 @@ def generate_html_report(outfile, parsers):
         of.write('                </tr>\n')
         of.write('            </thead>\n')
         of.write('            <tbody>\n')
-        for function in sorted(function_dict.keys()):
+        for function in sorted(categories_dict.keys()):
             of.write('                    <tr>\n')
             of.write('                          <td>' + function + '</td>\n')
             for parser in parsers:
