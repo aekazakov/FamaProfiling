@@ -17,4 +17,13 @@
 
 0.0.3
 -----
-* 
+* Fixed report creation
+
+0.0.4
+-----
+* Report in HTML format
+
+0.0.5
+-----
+* Updated Fama code using smaller reference database and function-specific cutoffs
+* New reference datasets

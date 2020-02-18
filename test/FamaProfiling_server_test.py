@@ -109,6 +109,7 @@ class FamaProfilingTest(unittest.TestCase):
         # Check returned data with
         # self.assertEqual(ret[...], ...) or other unittest methods
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+#                                                                    'read_library_ref': '22763/10/1',
                                                                     'read_library_ref': ru_ret['obj_ref'],
                                                                     'output_read_library_name': 'Fama_test_output'})
         print ('Report name', ret[0]['report_name'])

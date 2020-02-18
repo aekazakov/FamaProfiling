@@ -7,7 +7,8 @@ from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.baseclient import ServerError 
-from Fama.fastq_pipeline import functional_profiling_pipeline
+#from Fama.fastq_pipeline import functional_profiling_pipeline
+from fama.kbase_wrapper import pe_functional_profiling_pipeline as functional_profiling_pipeline
 #END_HEADER
 
 
@@ -79,11 +80,11 @@ class FamaProfiling:
         print('reverse: ' + rev_reads_file)
 
         # Run Fama
-        fwd_reads_outfile, rev_reads_outfile, out_report = functional_profiling_pipeline(fwd_reads_file, rev_reads_file, self.shared_folder)
+        fama_output = functional_profiling_pipeline(fwd_reads_file, rev_reads_file, self.shared_folder)
         
         # Write filtered reads to workspace
-        reads_params = {'fwd_file': fwd_reads_outfile,
-                        'rev_file': rev_reads_outfile,
+        reads_params = {'fwd_file': fama_output['fwd_reads'],
+                        'rev_file': fama_output['rev_reads'],
                         'sequencing_tech': 'Illumina',
                         'wsname': params['workspace_name'],
                         'name': params['output_read_library_name'],
@@ -98,7 +99,7 @@ class FamaProfiling:
         
         dfu = DataFileUtil(self.callback_url)
         try:
-            dfu_output = dfu.file_to_shock({'file_path': out_report,
+            dfu_output = dfu.file_to_shock({'file_path': fama_output['html_report'],
                                         'make_handle': 0, # ???
                                         'pack': 'zip'})
         except ServerError as dfue:
@@ -112,10 +113,11 @@ class FamaProfiling:
                          'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'}],
                          'direct_html_link_index': 0,
                          'html_links': [{'shock_id': dfu_output['shock_id'],
-                                         'path': out_report,
+                                         'description': 'HTML report for Fama App',
                                          'name': 'fama_report.html',
                                          'label': 'Fama_report'}
                                          ],
+                         'file_links': fama_output['report_files'],
                          'report_object_name': 'fama_profiling_report_' + str(uuid.uuid4()),
                          'workspace_name': params['workspace_name'],
                          'html_window_height': 460}
@@ -125,7 +127,7 @@ class FamaProfiling:
         self.log(str(report_info))
         output = {
             'report_name': report_info['name'],
-            'report_ref': report_info['ref'],
+            'report_ref': report_info['ref']
         }
         #END run_FamaProfiling
 

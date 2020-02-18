@@ -21,33 +21,28 @@ elif [ "${1}" = "init" ] ; then
   cd /data/famaprofiling
   pwd
 
-  echo "downloading background database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_background_db.faa.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_background_db.faa.gz
-  gunzip /data/famaprofiling/fama_background_db.faa.gz
-  /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/fama_background_db.faa --db /data/famaprofiling/fama_background_db
-  rm /data/famaprofiling/fama_background_db.faa
+  echo "downloading nitrogen cycle database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_nitrogen_v10.tar.gz"
+  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_nitrogen_v10.tar.gz
+  tar xvf /data/famaprofiling/fama_nitrogen_v10.tar.gz
+  rm /data/famaprofiling/fama_nitrogen_v10.tar.gz
+  /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/fama_nitrogen-cycle_classification_db_v.10.0.faa --db /data/famaprofiling/fama_nitrogen-cycle_classification_db_v.10.0
+  /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/fama_nitrogen-cycle_preselection_db_v.10.0.faa --db /data/famaprofiling/fama_nitrogen-cycle_preselection_db_v.10.0
+  rm /data/famaprofiling/fama_nitrogen-cycle_classification_db_v.10.0.faa
+  rm /data/famaprofiling/fama_nitrogen-cycle_preselection_db_v.10.0.faa
 
-  echo "downloading nitrogen cycle database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_nitrogen.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_nitrogen.tar.gz
-  tar xvf /data/famaprofiling/fama_nitrogen.tar.gz
-  rm /data/famaprofiling/fama_nitrogen.tar.gz
-  /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/fama_nitrogen_db.faa --db /data/famaprofiling/fama_nitrogen_db
-  rm /data/famaprofiling/fama_nitrogen_db.faa
+  echo "downloading taxonomy database: http://iseq.lbl.gov/mydocs/fama_downloads/fama1_taxonomy.tar.gz"
+  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama1_taxonomy.tar.gz
+  tar xvf /data/famaprofiling/fama1_taxonomy.tar.gz
+  rm /data/famaprofiling/fama1_taxonomy.tar.gz
 
-  echo "downloading universal markers database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_universal.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_universal.tar.gz
-  tar xvf /data/famaprofiling/fama_universal.tar.gz
-  rm /data/famaprofiling/fama_universal.tar.gz
-  /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/fama_universal_db.faa --db /data/famaprofiling/fama_universal_db
-  rm /data/famaprofiling/fama_universal_db.faa
+  echo "downloading Microbe Census data: http://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz"
+  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz
+  tar xvf /data/famaprofiling/microbecensus_data.tar.gz
+  rm /data/famaprofiling/microbecensus_data.tar.gz
+  /kb/deployment/bin/diamond/diamond makedb --in seqs.fa --db seqs
+  rm /data/famaprofiling/seqs.fa
 
-  echo "downloading taxonomy database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz
-  tar xvf /data/famaprofiling/fama_taxonomy.tar.gz
-  rm /data/famaprofiling/fama_taxonomy.tar.gz
-
-  if [ -s "/data/famaprofiling/fama_background_db.dmnd" ] ; then
-#  if [ -s "/data/famaprofiling/fama_background_db.dmnd" -a -s "/data/diamondsearchexampledb/fama_universal_db.dmnd"] ; then
+  if [ -s "/data/famaprofiling/seqs.dmnd" ] ; then
     echo "DATA DOWNLOADED SUCCESSFULLY"
     touch /data/__READY__
   else

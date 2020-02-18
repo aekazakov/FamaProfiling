@@ -23,6 +23,15 @@ RUN mkdir -p /kb/deployment/bin/diamond && \
 
 RUN /kb/deployment/bin/diamond/diamond version
 
+# Install Krona Tools
+RUN mkdir -p /kb/deployment/bin/krona && \
+    cd /kb/deployment/bin/krona && \
+    git clone https://github.com/marbl/Krona && \
+    cd Krona/KronaTools && \
+    ./install.pl --prefix /kb/deployment/bin/
+
+RUN pip install statsmodels mathstats xlsxwriter fpdf
+
 # -----------------------------------------
 
 COPY ./ /kb/module
