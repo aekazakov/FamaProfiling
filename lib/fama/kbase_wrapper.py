@@ -33,8 +33,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
     write_filtered_fastq(out_fwd_fastq, out_rev_fastq, project)
     output['fwd_reads'] = out_fwd_fastq
     output['rev_reads'] = out_rev_fastq
-    
-    
+
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
     generate_html_report(out_report, project)
@@ -53,7 +52,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
             metric = 'readcount'
 
     report_files.append(os.path.join(out_dir, 'fama_report.html'))
-    
+
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         project.options.project_name + '_' + metric + '_functions_taxonomy.xlsx'
@@ -78,7 +77,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
         report_files.append(krona_file)
     else:
         print('Krona diagram file not found')
-    
+
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
     with zipfile.ZipFile(result_file, 'w',
@@ -98,6 +97,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
 
 def write_config_file(scratch):
     ret_val = os.path.join(scratch, 'config.ini')
+    refdata_dir = '/data/famaprofiling/1.3/'
 
     with open(ret_val, 'w') as of:
         # Default section
@@ -107,33 +107,42 @@ def write_config_file(scratch):
                   'length_cutoff = 15\n'
                   'evalue_cutoff = 0.0001\n'
                   'hits_overlap_cutoff = 10\n'
-                  'biscore_range_cutoff = 0.03\n'))
-        of.write(('aligner_path = /kb/deployment/bin/diamond/diamond\n'
+                  'biscore_range_cutoff = 0.03\n'
+                  'aligner_path = /kb/deployment/bin/diamond/diamond\n'
                   'krona_path = /kb/deployment/bin/krona/Krona/KronaTools/scripts/ImportXML.pl\n'
-                  'taxonomy_file = /data/famaprofiling/fama_taxonomy.tsv\n'
-                  'microbecensus_data = /data/famaprofiling\n'))
+                  'taxonomy_file = '))
+        of.write(refdata_dir)
+        of.write(('fama_taxonomy.tsv\n'
+                  'microbecensus_data = '))
+        of.write(refdata_dir)
+        of.write('\n')
         # Reference library for nitrogen cycle
         of.write(('\n[nitrogen]\n'
-                  'functions_file = /data/famaprofiling/'
-                  'fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv\n'
-                  'proteins_list_file = /data/famaprofiling/'
-                  'fama_nitrogen-cycle_v.10.0_proteins.txt\n'
-                  'taxonomy_file = /data/famaprofiling/'
-                  'fama_nitrogen-cycle_v.10.0_taxonomy.tsv\n'
-                  'reference_diamond_db = /data/famaprofiling/'
-                  'fama_nitrogen-cycle_preselection_db_v.10.0.dmnd\n'
+                  'functions_file = '))
+        of.write(refdata_dir)
+        of.write(('fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv\n'
+                  'proteins_list_file = '))
+        of.write(refdata_dir)
+        of.write(('fama_nitrogen-cycle_v.10.0_proteins.txt\n'
+                  'taxonomy_file = '))
+        of.write(refdata_dir)
+        of.write(('fama_nitrogen-cycle_v.10.0_taxonomy.tsv\n'
+                  'reference_diamond_db = '))
+        of.write(refdata_dir)
+        of.write(('fama_nitrogen-cycle_preselection_db_v.10.0.dmnd\n'
                   'reference_db_size = 18389191\n'
-                  'background_diamond_db = /data/famaprofiling/'
-                  'fama_nitrogen-cycle_classification_db_v.10.0.dmnd\n'
+                  'background_diamond_db = '))
+        of.write(refdata_dir)
+        of.write(('fama_nitrogen-cycle_classification_db_v.10.0.dmnd\n'
                   'background_db_size = 64090633\n'))
         # Reference library for universal markers
         # of.write(('\n[universal]\n'
-                    # 'functions_file = /data/famaprofiling/fama_universal_functions.txt\n'
-                    # 'proteins_list_file = /data/famaprofiling/fama_universal_db.txt\n'
-                    # 'reference_diamond_db = /data/famaprofiling/fama_universal_db.dmnd\n'
-                    # 'reference_db_size = 18204243\n'
-                    # 'background_diamond_db = /data/famaprofiling/fama_background_db.dmnd\n'
-                    # 'background_db_size = 4156041913\n'))
+        #            'functions_file = /data/famaprofiling/fama_universal_functions.txt\n'
+        #            'proteins_list_file = /data/famaprofiling/fama_universal_db.txt\n'
+        #            'reference_diamond_db = /data/famaprofiling/fama_universal_db.dmnd\n'
+        #            'reference_db_size = 18204243\n'
+        #            'background_diamond_db = /data/famaprofiling/fama_background_db.dmnd\n'
+        #            'background_db_size = 4156041913\n'))
         of.write('\n')
 
     return ret_val

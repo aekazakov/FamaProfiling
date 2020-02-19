@@ -27,3 +27,7 @@
 -----
 * Updated Fama code using smaller reference database and function-specific cutoffs
 * New reference datasets
+
+0.0.6
+-----
+* Reference data moved

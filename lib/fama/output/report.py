@@ -1065,7 +1065,8 @@ def generate_sample_report(project, sample_id, metric=None):
     if project.samples[sample_id].rpkg_scaling_factor is None and (
             metric in ['efpkg', 'fpkg', 'erpkg', 'rpkg']
     ):
-        print('Not enough data to normalize by average genome size. Raw read or fragment counts will be reported.')
+        print(('Not enough data to normalize by average genome size. '
+               'Raw read or fragment counts will be reported.'))
         if project.is_paired_end():
             metric = 'fragmentcount'
         else:
@@ -1073,7 +1074,8 @@ def generate_sample_report(project, sample_id, metric=None):
     if project.samples[sample_id].rpkm_scaling_factor is None and (
             metric in ['efpkm', 'fpkm', 'erpkm', 'rpkm']
     ):
-        print('Not enough data to normalize by sample size. Raw read or fragment counts will be reported.')
+        print(('Not enough data to normalize by sample size. '
+               'Raw read or fragment counts will be reported.'))
         if project.is_paired_end():
             metric = 'fragmentcount'
         else:
