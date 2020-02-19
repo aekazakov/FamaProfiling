@@ -37,7 +37,11 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
     generate_html_report(out_report, project)
-    output['html_report'] = out_report
+    with zipfile.ZipFile(out_report + '.zip', 'w',
+                         zipfile.ZIP_DEFLATED,
+                         allowZip64=True) as zip_file:
+        zip_file.write(out_report, 'fama_report.html')
+    output['html_report'] = out_report + '.zip'
 
     # TODO: Krona charts generate_functions_chart(parser_fwd)
     report_files = {}
@@ -51,7 +55,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
         if project.samples[sample_id].rpkg_scaling_factor == 0.0:
             metric = 'readcount'
 
-    report_files[os.path.join(out_dir, 'fama_report.html')] = 'fama_report.html'
+    report_files[out_report + '.zip'] = 'fama_report.html'
 
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
@@ -74,8 +78,12 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
         sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
         ))
     if os.path.exists(krona_file):
-        report_files[krona_file] = 'function_taxonomy_profile_Krona_chart.html'
-        output['krona_chart'] = krona_file
+        with zipfile.ZipFile(krona_file + '.zip', 'w',
+                             zipfile.ZIP_DEFLATED,
+                             allowZip64=True) as zip_file:
+            zip_file.write(krona_file, 'function_taxonomy_profile_Krona_chart.html')
+        report_files[krona_file + '.zip'] = 'function_taxonomy_profile_Krona_chart.html'
+        output['krona_chart'] = krona_file + '.zip'
     else:
         print('Krona diagram file not found:', krona_file)
 
