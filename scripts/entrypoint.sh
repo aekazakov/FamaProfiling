@@ -42,7 +42,7 @@ elif [ "${1}" = "init" ] ; then
   /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/1.3/seqs.fa --db /data/famaprofiling/1.3/seqs
   rm /data/famaprofiling/1.3/seqs.fa
 
-  if [ -s "/data/famaprofiling/seqs.dmnd" ] ; then
+  if [ -s "/data/famaprofiling/1.3/seqs.dmnd" ] ; then
     echo "DATA DOWNLOADED SUCCESSFULLY"
     touch /data/__READY__
   else
