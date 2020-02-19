@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+import numpy as np
 
 from fama.utils.utils import autovivify
 from fama.taxonomy.taxonomy_profile import TaxonomyProfile
@@ -33,10 +34,12 @@ def compose_run_info(project):
         result.append('<p>Predicted average insert size: ' +
                       '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
                       '</p>')
-    if project.samples[sample_id].rpkg_scaling_factor is not None:
+    if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+        result.append('<p>Not enough data to predict average genome size.</p>')
+    else:
         result.append('<p>Predicted average genome size: ' +
                       '{0:.0f}'.format(
-                                        project.options.get_fastq1_readcount(sample_id) *
+                                        project.options.get_fastq1_basecount(sample_id) *
                                         project.samples[sample_id].rpkg_scaling_factor
                                         ) +
                       '</p>')
@@ -49,16 +52,16 @@ def compose_functional_profile(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'erpkm'
         else:
             metric = 'readcount'
@@ -68,6 +71,7 @@ def compose_functional_profile(project):
     if metric != 'readcount':
         result.append('<th>Raw read count</th>')
     result.append('<th>Amino acid identity %, average</th>')
+    result.append('<th>Description</th>')
     result.append('</thead></tr>')
 
     for function in scores:
@@ -80,7 +84,9 @@ def compose_functional_profile(project):
                               )
             result.append('<td>' + '{0:.2f}'.format(
                 scores[function][sample_id]['identity'] / scores[function][sample_id]['hit_count']
-                ) + '</td></tr>')
+                ) + '</td>')
+            result.append('<td>' + project.ref_data.lookup_function_name(function)
+                + '</td></tr>')
     result.append('</table>')
     return '\n'.join(result)
 
@@ -90,16 +96,16 @@ def compose_function_groups(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'erpkm'
         else:
             metric = 'readcount'
@@ -142,16 +148,16 @@ def compose_taxonomy_profile(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor is not None:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor is not None:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
             metric = 'erpkm'
         else:
             metric = 'readcount'
@@ -166,8 +172,9 @@ def compose_taxonomy_profile(project):
 
     tax_profile = TaxonomyProfile()
     tax_profile.make_function_taxonomy_profile(project.taxonomy_data, sample_scores)
-    taxonomy_df = tax_profile.convert_profile_into_df(metric=metric)
-    return taxonomy_df.to_html()
+    taxonomy_df = tax_profile.convert_profile_into_score_df(metric=metric)
+    taxonomy_df.replace(0.0, np.nan, inplace=True)
+    return taxonomy_df.to_html(na_rep="")  # , float_format=lambda x: '%.2f' % x)
 
 
 def generate_html_report(outfile, project):
@@ -184,6 +191,10 @@ def generate_html_report(outfile, project):
                 elif line == '<\FunctionGroups>':
                     of.write(compose_function_groups(project))
                 elif line == '<\TaxonomyProfile>':
-                    of.write(compose_taxonomy_profile(project))
+                    taxonomy_profile = compose_taxonomy_profile(project)
+                    if taxonomy_profile:
+                        of.write(taxonomy_profile)
+                    else:
+                        of.write('<p>No taxonomy data</p>/n')
                 else:
                     of.write(line + '\n')

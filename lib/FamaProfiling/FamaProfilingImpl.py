@@ -99,24 +99,37 @@ class FamaProfiling:
         
         dfu = DataFileUtil(self.callback_url)
         try:
-            dfu_output = dfu.file_to_shock({'file_path': fama_output['html_report'],
-                                        'make_handle': 0, # ???
-                                        'pack': 'zip'})
+            dfu_output = dfu.file_to_shock({'file_path': fama_output['html_report']})
         except ServerError as dfue:
             # not really any way to test this block
             self.log('Logging exception loading results to shock')
             self.log(str(dfue))
             raise
 
+        html_links = [{'shock_id': dfu_output['shock_id'],
+                       'description': 'HTML report for Fama App',
+                       'name': 'fama_report.html',
+                       'label': 'Fama_report'}
+                      ]
+        if 'krona_chart' in fama_output:
+            try:
+                dfu_output = dfu.file_to_shock({'file_path': fama_output['krona_chart']})
+                html_links.append({'shock_id': dfu_output['shock_id'],
+                                   'description': 'Krona chart for function taxonomy profile',
+                                   'name': 'function_taxonomy_profile_krona_chart.html',
+                                   'label': 'Function taxonomy profile chart'}
+                                  )
+            except ServerError as dfue:
+                # not really any way to test this block
+                self.log('Logging exception loading results to shock')
+                self.log(str(dfue))
+                raise
+
         # Save report
         report_params = {'message': message,
                          'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'}],
                          'direct_html_link_index': 0,
-                         'html_links': [{'shock_id': dfu_output['shock_id'],
-                                         'description': 'HTML report for Fama App',
-                                         'name': 'fama_report.html',
-                                         'label': 'Fama_report'}
-                                         ],
+                         'html_links': html_links,
                          'file_links': fama_output['report_files'],
                          'report_object_name': 'fama_profiling_report_' + str(uuid.uuid4()),
                          'workspace_name': params['workspace_name'],

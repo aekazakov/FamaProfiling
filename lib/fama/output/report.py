@@ -418,7 +418,13 @@ def get_function_scores(project, sample_id=None, metric=None):
             raise ValueError('Unknown metric:' + metric)
 
         if norm_factor == 0.0:
-            raise ValueError('Cannot get normalization factor')
+            print('Cannot get normalization factor for metric', metric, 'in sample', sample)
+            print('Fall back to raw counts.')
+            norm_factor = 1.0
+            if project.samples[sample].is_paired_end: 
+                metric = 'fragmentcount'
+            else:
+                metric = 'readcount'
 
         # Calculate scores
         if metric in ['readcount', 'erpk', 'erpkg', 'erpkm']:
@@ -741,7 +747,13 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
             norm_factor = project.samples[sample].rpkg_scaling_factor
 
         if norm_factor == 0.0:
-            raise ValueError('Cannot get normalization factor')
+            print('Cannot get normalization factor for metric', metric, 'in sample', sample)
+            print('Fall back to raw counts.')
+            norm_factor = 1.0
+            if project.samples[sample].is_paired_end: 
+                metric = 'fragmentcount'
+            else:
+                metric = 'readcount'
 
         # Calculate scores
         if metric in ['readcount', 'rpkg', 'rpkm', 'erpk', 'erpkg', 'erpkm']:
@@ -1038,10 +1050,10 @@ def generate_sample_report(project, sample_id, metric=None):
                         + str(project.samples[sample_id].fastq_rev_basecount) + '\n')
 
         out_f.write('\nNormalization\n')
-        if not project.samples[sample_id].rpkm_scaling_factor is None:
+        if not project.samples[sample_id].rpkm_scaling_factor == 0.0:
             out_f.write('RPKM normalization factor:\t'
                         + str(project.samples[sample_id].rpkm_scaling_factor) + '\n')
-        if not project.samples[sample_id].rpkg_scaling_factor is None:
+        if not project.samples[sample_id].rpkg_scaling_factor == 0.0:
             out_f.write('Average genome size:\t' + format(
                 project.samples[sample_id].rpkg_scaling_factor
                 * project.samples[sample_id].fastq_fwd_basecount, "0.0f"
@@ -1062,7 +1074,7 @@ def generate_sample_report(project, sample_id, metric=None):
                 'FASTQ file 2:\t' + str(len(project.samples[sample_id].reads['pe2'])) + '\n'
                 )
 
-    if project.samples[sample_id].rpkg_scaling_factor is None and (
+    if project.samples[sample_id].rpkg_scaling_factor == 0.0 and (
             metric in ['efpkg', 'fpkg', 'erpkg', 'rpkg']
     ):
         print(('Not enough data to normalize by average genome size. '
@@ -1071,7 +1083,7 @@ def generate_sample_report(project, sample_id, metric=None):
             metric = 'fragmentcount'
         else:
             metric = 'readcount'
-    if project.samples[sample_id].rpkm_scaling_factor is None and (
+    if project.samples[sample_id].rpkm_scaling_factor == 0.0 and (
             metric in ['efpkm', 'fpkm', 'erpkm', 'rpkm']
     ):
         print(('Not enough data to normalize by sample size. '
@@ -1227,12 +1239,12 @@ def generate_project_report(project, metric=None):
         if is_paired_end:
             metric = 'efpkg'
             for sample_id in project.list_samples():
-                if project.samples[sample_id].rpkg_scaling_factor is None:
+                if project.samples[sample_id].rpkg_scaling_factor == 0.0:
                     metric = 'fragmentcount'
         else:
             metric = 'erpkg'
             for sample_id in project.list_samples():
-                if project.samples[sample_id].rpkg_scaling_factor is None:
+                if project.samples[sample_id].rpkg_scaling_factor == 0.0:
                     metric = 'readcount'
 
     scores = get_function_scores(project, sample_id=None, metric=metric)
@@ -1697,14 +1709,14 @@ def generate_sample_text_report(project, sample_id, metric=None):
                         + str(project.samples[sample_id].fastq_rev_basecount) + '\n')
 
         out_f.write('\nNormalization\n')
-        if not project.samples[sample_id].rpkm_scaling_factor is None:
+        if not project.samples[sample_id].rpkm_scaling_factor == 0.0:
             out_f.write(
                 'RPKM normalization factor:\t' + str(
                     project.samples[sample_id].rpkm_scaling_factor
                     )
                 + '\n'
                 )
-        if not project.samples[sample_id].rpkg_scaling_factor is None:
+        if not project.samples[sample_id].rpkg_scaling_factor == 0.0:
             out_f.write(
                 'Average genome size:\t' + format(
                     project.samples[sample_id].rpkg_scaling_factor
@@ -1741,14 +1753,22 @@ def generate_sample_text_report(project, sample_id, metric=None):
                 + '\n'
                 )
 
-    if project.samples[sample_id].rpkg_scaling_factor is None and (
+    if project.samples[sample_id].rpkg_scaling_factor == 0.0 and (
             metric in ['efpkg', 'fpkg', 'erpkg', 'rpkg']
     ):
-        raise ValueError('Not enough data to normalize by average genome size')
-    if project.samples[sample_id].rpkm_scaling_factor is None and (
+        print('Not enough data to normalize by average genome size. Fall back to raw counts.')
+        if project.samples[sample_id].is_paired_end:
+            metric = 'fragmentcount'
+        else:
+            metric = 'readcount'
+    if project.samples[sample_id].rpkm_scaling_factor == 0.0 and (
             metric in ['efpkm', 'fpkm', 'erpkm', 'rpkm']
     ):
-        raise ValueError('Not enough data to normalize by sample size')
+        print('Not enough data to normalize by sample size. Fall back to raw counts.')
+        if project.samples[sample_id].is_paired_end:
+            metric = 'fragmentcount'
+        else:
+            metric = 'readcount'
 
     scores_function = get_function_scores(project, sample_id, metric=metric)
     scores_function_taxonomy = get_function_taxonomy_scores(project, sample_id, metric=metric)

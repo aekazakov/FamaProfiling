@@ -105,7 +105,7 @@ div.desc {
     <button class="tablinks" onclick="openTab(event, 'test1')" id="defaultOpen">Run info</button>
     <button class="tablinks" onclick="openTab(event, 'test2')" id="defaultOpen">Functional profile</button>
     <button class="tablinks" onclick="openTab(event, 'test3')" id="defaultOpen">Functions by category</button>
-    <button class="tablinks" onclick="openTab(event, 'test4')" id="defaultOpen">Taxonomy profile (under construction)</button>
+    <button class="tablinks" onclick="openTab(event, 'test4')" id="defaultOpen">Taxonomy profile</button>
 </div>
     <div id="test1" class="tabcontent">
 <\RunInfo>
@@ -115,7 +115,6 @@ div.desc {
 <\FunctionalProfile>
     </div>
     <div id="test3" class="tabcontent">
-        Test 3
 <\FunctionGroups>
     </div>
     <div id="test4" class="tabcontent">

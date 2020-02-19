@@ -106,7 +106,7 @@ class Sample(object):
                     if line.startswith('average_genome_size:'):
                         ags = float(line.rstrip('\n\r').split('\t')[-1])
                         if ags == 0.0:
-                            self.rpkg_scaling_factor = None
+                            self.rpkg_scaling_factor = 0.0
                         elif self.fastq_fwd_basecount > 0:
                             self.rpkg_scaling_factor = ags/self.fastq_fwd_basecount
                         elif self.fastq_rev_basecount > 0:

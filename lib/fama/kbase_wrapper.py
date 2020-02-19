@@ -40,43 +40,44 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
     output['html_report'] = out_report
 
     # TODO: Krona charts generate_functions_chart(parser_fwd)
-    report_files = []
+    report_files = {}
     sample_id = project.list_samples()[0]
     if project.samples[sample_id].is_paired_end:
         metric = 'efpkg'
-        if project.samples[sample_id].rpkg_scaling_factor is None:
+        if project.samples[sample_id].rpkg_scaling_factor == 0.0:
             metric = 'fragmentcount'
     else:
         metric = 'erpkg'
-        if project.samples[sample_id].rpkg_scaling_factor is None:
+        if project.samples[sample_id].rpkg_scaling_factor == 0.0:
             metric = 'readcount'
 
-    report_files.append(os.path.join(out_dir, 'fama_report.html'))
+    report_files[os.path.join(out_dir, 'fama_report.html')] = 'fama_report.html'
 
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         project.options.project_name + '_' + metric + '_functions_taxonomy.xlsx'
         ))
     if os.path.exists(project_xlsx_report):
-        report_files.append(project_xlsx_report)
+        report_files[project_xlsx_report] = 'function_taxonomy_profile_short.xlsx'
     else:
-        print('Project XLSX file not found')
+        print('Project XLSX file not found:', project_xlsx_report)
     sample_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         sample_id + '_' + metric + '_functions_taxonomy.xlsx'
         ))
     if os.path.exists(sample_xlsx_report):
-        report_files.append(sample_xlsx_report)
+        report_files[sample_xlsx_report] = 'function_taxonomy_profile_full.xlsx'
     else:
-        print('Sample XLSX file not found')
+        print('Sample XLSX file not found:', sample_xlsx_report)
     krona_file = sanitize_file_name(os.path.join(
         project.options.work_dir,
         sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
         ))
     if os.path.exists(krona_file):
-        report_files.append(krona_file)
+        report_files[krona_file] = 'function_taxonomy_profile_Krona_chart.html'
+        output['krona_chart'] = krona_file
     else:
-        print('Krona diagram file not found')
+        print('Krona diagram file not found:', krona_file)
 
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
@@ -84,8 +85,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
         for filename in report_files:
-            _, tail = os.path.split(filename)
-            zip_file.write(filename, tail)
+            zip_file.write(filename, report_files[filename])
     output_files.append({'path': result_file,
                          'name': os.path.basename(result_file),
                          'label': os.path.basename(result_file),

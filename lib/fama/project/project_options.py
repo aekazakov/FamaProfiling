@@ -225,7 +225,7 @@ class ProjectOptions(object):
         Args:
             sample (str): sample identifier
         """
-        result = None
+        result = 0.0
         if self.parser.has_option(sample, 'rpkg_scaling'):
             result = float(self.parser[sample]['rpkg_scaling'])
         return result
