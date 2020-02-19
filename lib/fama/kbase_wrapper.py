@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Starts Fama functional profiling pipeline from KBase environment"""
 import os
+import shutil
 import uuid
 import zipfile
 from fama.utils.const import ENDS, STATUS_GOOD
@@ -78,12 +79,14 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch):
         sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
         ))
     if os.path.exists(krona_file):
-        with zipfile.ZipFile(krona_file + '.zip', 'w',
+        krona_output = os.path.join(out_dir, 'function_taxonomy_profile_chart.html')
+        shutil.copy2(krona_file, krona_output)
+        with zipfile.ZipFile(krona_output + '.zip', 'w',
                              zipfile.ZIP_DEFLATED,
                              allowZip64=True) as zip_file:
-            zip_file.write(krona_file, 'function_taxonomy_profile_Krona_chart.html')
-        report_files[krona_file + '.zip'] = 'function_taxonomy_profile_Krona_chart.html'
-        output['krona_chart'] = krona_file + '.zip'
+            zip_file.write(krona_output, 'function_taxonomy_profile_chart.html')
+        report_files[krona_output + '.zip'] = 'function_taxonomy_profile_chart.html'
+        output['krona_chart'] = krona_output + '.zip'
     else:
         print('Krona diagram file not found:', krona_file)
 
