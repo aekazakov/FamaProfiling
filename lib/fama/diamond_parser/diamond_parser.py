@@ -425,7 +425,8 @@ class DiamondParser(object):
                     try:
                         outfile.write(read.sequence[start:end] + '\n')
                     except TypeError:
-                        print('TypeError occurred while exporting ', read_id)
+                        print('TypeError occurred while exporting ', read_id, 'start', str(start), 'end', str(end))
+                        print(read.sequence)
 
     def export_hit_list(self):
         """Exports tab-separated table of DAIMOND hits"""

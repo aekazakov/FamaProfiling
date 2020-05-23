@@ -34,7 +34,7 @@ def compose_run_info(project):
         result.append('<p>Predicted average insert size: ' +
                       '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
                       '</p>')
-    if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+    if project.samples[sample_id].rpkg_scaling_factor == 0.0 or project.samples[sample_id].rpkg_scaling_factor is None:
         result.append('<p>Not enough data to predict average genome size.</p>')
     else:
         result.append('<p>Predicted average genome size: ' +
@@ -52,16 +52,16 @@ def compose_functional_profile(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'erpkm'
         else:
             metric = 'readcount'
@@ -96,16 +96,16 @@ def compose_function_groups(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'erpkm'
         else:
             metric = 'readcount'
@@ -148,16 +148,16 @@ def compose_taxonomy_profile(project):
     sample_id = project.list_samples()[0]
     metric = None
     if project.samples[sample_id].is_paired_end:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'efpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'efpkm'
         else:
             metric = 'fragmentcount'
     else:
-        if project.samples[sample_id].rpkg_scaling_factor != 0.0:
+        if project.samples[sample_id].rpkg_scaling_factor != 0.0 and project.samples[sample_id].rpkg_scaling_factor is not None:
             metric = 'erpkg'
-        elif project.samples[sample_id].rpkm_scaling_factor != 0.0:
+        elif project.samples[sample_id].rpkm_scaling_factor != 0.0 and project.samples[sample_id].rpkm_scaling_factor is not None:
             metric = 'erpkm'
         else:
             metric = 'readcount'

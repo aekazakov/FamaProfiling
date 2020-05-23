@@ -491,15 +491,19 @@ def parse_fastq_seqid(line):
                 # unknown format
                 result = (line_tokens[0], '')
         else:
-            # unknown format
+            # sequences from FASTA files?
             result = (line_tokens[0], '')
         # return (line.split('\s')[0], line.split('\s')[1][0])
     elif line.endswith('/1') or line.endswith('/2'):
         # Old Ilumina format
         result = (line[:-2], line[-1])
     elif line.endswith('.1') or line.endswith('.2'):
-        # Converted SRA
-        result = (line[:-2], line[-1])
+        if len(line.split('.')) == 3:
+            # Converted SRA
+            result = (line[:-2], line[-1])
+        else:
+            #  NCBI accession number?
+            result = (line, '')
     return result
 
 

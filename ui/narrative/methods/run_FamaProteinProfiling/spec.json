@@ -11,14 +11,14 @@
     },
     "parameters": [ 
         {
-            "id": "read_library_ref",
+            "id": "genome_ref",
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": ["KBaseAssembly.PairedEndLibrary","KBaseFile.PairedEndLibrary","KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary"]
+                "valid_ws_types": ["KBaseGenomes.Genome"]
             }
         },
        {
@@ -52,11 +52,11 @@
             }
         },
         {
-            "id" : "output_read_library_name",
+            "id" : "output_feature_set_name",
             "optional" : false,
             "advanced" : false,
             "allow_multiple" : false,
-            "default_values" : [ "Fama.filtered.reads" ],
+            "default_values" : [ "Fama.filtered.features" ],
             "field_type" : "text",
             "text_options" : {
                 "valid_ws_types" : [],
@@ -68,15 +68,15 @@
         "service-mapping": {
             "url": "",
             "name": "FamaProfiling",
-            "method": "run_FamaProfiling",
+            "method": "run_FamaProteinProfiling",
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",
                     "target_property": "workspace_name"
                 },
                 {
-                    "input_parameter": "read_library_ref",
-                    "target_property": "read_library_ref",
+                    "input_parameter": "genome_ref",
+                    "target_property": "genome_ref",
                      "target_type_transform": "resolved-ref"
                 },
                 {
@@ -84,8 +84,8 @@
                     "target_property": "ref_dataset"
                 },
                 {
-                    "input_parameter": "output_read_library_name",
-                    "target_property": "output_read_library_name"
+                    "input_parameter": "output_feature_set_name",
+                    "target_property": "output_feature_set_name"
                 }
             ],
             "output_mapping": [

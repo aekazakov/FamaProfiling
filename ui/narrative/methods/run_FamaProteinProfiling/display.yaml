@@ -1,10 +1,10 @@
 #
 # define display information
 #
-name: Run Fama Profiling
+name: Run Fama Protein Profiling
 
 tooltip: |
-    Run functional profiling of sequence reads with Fama
+    Run functional profiling of genome proteins with Fama
 
 screenshots: []
 
@@ -24,13 +24,13 @@ suggestions:
 # Configure the display and description of parameters
 #
 parameters :
-    read_library_ref :
+    genome_ref :
         ui-name : |
-            Read Library
+            Genome
         short-hint : |
-            PairedEnd or SingleRead library
+            Genome object
         long-hint : |
-            PairedEnd or SingleRead library
+            Genome object
     ref_dataset:
         ui-name : |
             Reference Dataset
@@ -38,14 +38,14 @@ parameters :
             Choose reference dataset for profiling
         long-hint : |
             Choose one of the reference datasets for profiling: nitrogen cycle proteins, unversal marker proteins, ribosomal protein L6
-    output_read_library_name:
+    output_feature_set_name:
         ui-name : |
-            Output Read Library
+            Output Feature Set
         short-hint : |
-            Enter a name for the filtered read library
+            Enter a name for the filtered feature set
         long-hint : |
-            Enter a name for the filtered read library
+            Enter a name for the filtered feature set
 
 description : |
-    <p>This is a KBase wrapper for read functional profiling module of Fama.</p>
+    <p>This is a KBase wrapper for protein functional profiling module of Fama.</p>
     <p>Basically, the functional profiling procedure consists of running two similarity searches using DIAMOND, a very fast sequence aligner. The first search selects candidate sequences, while the second search removes false hits.</p>

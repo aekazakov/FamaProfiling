@@ -42,7 +42,7 @@ def import_protein_fasta(parser):
             if line.startswith('>'):
                 read_count += 1
                 if current_id != '':
-                    seq_id = current_id[1:].split(' ')[0]
+#                    seq_id = current_id[1:].split(' ')[0]
                     parser.reads[seq_id].read_id_line = current_id
                     parser.reads[seq_id].sequence = ''.join(sequence)
                     read_count += 1
@@ -52,6 +52,7 @@ def import_protein_fasta(parser):
                 if seq_id in parser.reads:
                     current_id = line
                 else:
+                    print(seq_id, 'not found')
                     current_id = ''
                     seq_id = None
             else:
@@ -338,21 +339,19 @@ def functional_profiling_pipeline(project, sample):
     return {read_id: read for (read_id, read) in parser.reads.items() if read.status == 'function'}
 
 
-def protein_pipeline(args):
+def protein_pipeline(project):
     """Functional profiling pipeline for the entire project.
 
     Args:
-        args: ArgumentParser namespace with defined args.config (path to
-            program config ini file) and args.project (path to project
-            options ini file)
+        project (:obj:Project): current project
     """
-    project = Project(config_file=args.config, project_file=args.project)
+    #project = Project(config_file=args.config, project_file=args.project)
     sample_ids = []
 
     for sample_id in project.list_samples():
-        if args.sample is not None:
-            if args.sample != sample_id:
-                continue
+        #~ if args.sample is not None:
+            #~ if args.sample != sample_id:
+                #~ continue
         sample = Sample(sample_id)
         sample.load_sample(project.options)
         project.samples[sample_id] = sample
@@ -372,9 +371,10 @@ def protein_pipeline(args):
         project.options.set_sample_data(project.samples[sample_id])
 
     # Generate output for the project
-    if args.sample is None:
-        # Skip project report if the pipeline is running for only one sample
-        generate_protein_project_report(project)
+    #~ if args.sample is None:
+        #~ # Skip project report if the pipeline is running for only one sample
+    generate_protein_project_report(project)
 
     generate_output(project)
     project.save_project_options()
+    return project

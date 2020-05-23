@@ -342,6 +342,10 @@ class Application(object):
                              name='FamaProfiling.run_FamaProfiling',
                              types=[dict])
         self.method_authentication['FamaProfiling.run_FamaProfiling'] = 'required'  # noqa
+        self.rpc_service.add(impl_FamaProfiling.run_FamaProteinProfiling,
+                             name='FamaProfiling.run_FamaProteinProfiling',
+                             types=[dict])
+        self.method_authentication['FamaProfiling.run_FamaProteinProfiling'] = 'required'  # noqa
         self.rpc_service.add(impl_FamaProfiling.status,
                              name='FamaProfiling.status',
                              types=[dict])

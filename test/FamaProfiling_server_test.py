@@ -70,49 +70,33 @@ class FamaProfilingTest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_fama_profiling(self):
+    def test_pe_fama_profiling(self):
 
-        # wd = os.getcwd()
-        # os.chdir(self.scratch)
-        # with Popen(['curl','-LO','http://iseq.lbl.gov/mydocs/fama_downloads/test_fastq_pe1.fq'], stdout=PIPE, bufsize=1, universal_newlines=True) as p:
-        #     for line in p.stdout:
-        #         print(line, end='')
-        # if p.returncode != 0:
-        #     raise CalledProcessError(p.returncode, p.args)
-        # with Popen(['curl','-LO','http://iseq.lbl.gov/mydocs/fama_downloads/test_fastq_pe2.fq'], stdout=PIPE, bufsize=1, universal_newlines=True) as p:
-        #     for line in p.stdout:
-        #         print(line, end='')
-        # if p.returncode != 0:
-        #     raise CalledProcessError(p.returncode, p.args)
-        
-        # time.sleep(3.0)
-        # os.chdir(wd)
-        
-        # ru = ReadsUtils(self.callback_url)
-        # reads_params = {'fwd_file': os.path.join(self.scratch, 'test_fastq_pe1.fq'),
-        #                 'rev_file': os.path.join(self.scratch, 'test_fastq_pe2.fq'),
-        #                 'sequencing_tech': 'Illumina',
-        #                 'wsname': self.getWsName(),
-        #                 'name': 'Fama_test_input',
-        #                 'interleaved': 'false'
-        #                 }
-        # ru_ret = ru.upload_reads(reads_params)
-
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                 'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+                                                                    'ref_dataset': 'nitrogen',
 #                                                                    'read_library_ref': '22763/10/1',  # 4706 read set (LARGE!)
-                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
-#                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
+#                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
+                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
 #                                                                    'read_library_ref': ru_ret['obj_ref'], # tiny read set (20 + 20 reads), upload from local files
-                                                                    'output_read_library_name': 'Fama_test_output'})
+                                                                    'output_read_library_name': 'Fama_se_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         
+    def test_se_fama_profiling(self):
+        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+                                                                    'ref_dataset': 'nitrogen',
+                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
+                                                                    'output_read_library_name': 'Fama_se_test_output'})
+        print ('Report name', ret[0]['report_name'])
+        print ('Report reference', ret[0]['report_ref'])
+        
+        
+    def test_protein_fama_profiling(self):
+        ret = self.getImpl().run_FamaProteinProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+                                                                    'ref_dataset': 'nitrogen',
+                                                                    'genome_ref': '22763/32/1',  # S. oneidensis genome
+                                                                    'output_feature_set_name': 'Fama_protein_test_output'})
+        print ('Report name', ret[0]['report_name'])
+        print ('Report reference', ret[0]['report_ref'])
+        
+

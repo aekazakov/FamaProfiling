@@ -149,7 +149,7 @@ def fastq_pipeline(project, sample_identifier=None, end_identifier=None):
         for end in ENDS:
             if end_identifier is not None and end != end_identifier:
                 continue
-            if end == 'pe2' and project.options.get_fastq_path(sample_id, end) is None:
+            if end == 'pe2':
                 continue
             project.samples[sample_id].reads[end] = \
                 run_fastq_pipeline(project,
@@ -167,6 +167,7 @@ def fastq_pipeline(project, sample_identifier=None, end_identifier=None):
 
     # Rename existing project file and save current version
     project.save_project_options()
+    return project
 
 
 def run_fastq_pipeline(project, sample, end_id):
