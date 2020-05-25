@@ -44,8 +44,8 @@ def run_ref_search(parser, command, options=None):
                                    str(parser.config.get_evalue_cutoff(
                                        parser.options.get_collection(parser.sample.sample_id)
                                    )),
-                                   '--threads',
-                                   parser.config.threads,
+                                   #~ '--threads',
+                                   #~ parser.config.threads,
                                    '--outfmt', '6', 'qseqid', 'sseqid', 'pident', 'length',
                                    'mismatch', 'slen', 'qstart', 'qend', 'sstart', 'send',
                                    'evalue', 'bitscore']
@@ -92,8 +92,8 @@ def run_bgr_search(parser, command, options=None):
                                        ) / parser.config.get_reference_db_size(
                                            parser.options.get_collection(parser.sample.sample_id)
                                        )),
-                                   '--threads',
-                                   parser.config.threads,
+                                   #~ '--threads',
+                                   #~ parser.config.threads,
                                    '--outfmt', '6', 'qseqid', 'sseqid', 'pident', 'length',
                                    'mismatch', 'slen', 'qstart', 'qend', 'sstart', 'send',
                                    'evalue', 'bitscore']

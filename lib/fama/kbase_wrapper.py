@@ -15,7 +15,7 @@ from fama.protein_functional_pipeline import protein_pipeline
 from fama.kbase_report import generate_html_report
 
 # How can I get reference data path from the server?
-refdata_dir = '/data/famaprofiling/1.3/'
+refdata_dir = '/data/famaprofiling/1.4/'
 
 
 def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset):
@@ -205,92 +205,49 @@ def write_config_file(scratch):
 
     with open(ret_val, 'w') as of:
         # Default section
-        of.write(('[DEFAULT]\n'
-                  'threads = 2\n'
-                  'identity_cutoff = 50.0\n'
-                  'length_cutoff = 15\n'
-                  'evalue_cutoff = 0.0001\n'
-                  'hits_overlap_cutoff = 10\n'
-                  'biscore_range_cutoff = 0.03\n'
-                  'aligner_path = /kb/deployment/bin/diamond/diamond\n'
-                  'krona_path = /kb/deployment/bin/krona/Krona/KronaTools/scripts/ImportXML.pl\n'
-                  'taxonomy_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_taxonomy.tsv\n'
-                  'microbecensus_data = '))
-        of.write(refdata_dir)
-        of.write('\n')
+        config = """[DEFAULT]
+threads = 16
+identity_cutoff = 50.0
+length_cutoff = 15
+evalue_cutoff = 0.0001
+hits_overlap_cutoff = 10
+biscore_range_cutoff = 0.03
+aligner_path = /kb/deployment/bin/diamond/diamond
+krona_path = /kb/deployment/bin/krona/Krona/KronaTools/scripts/ImportXML.pl
+taxonomy_file = {refdir}/fama_taxonomy.tsv
+microbecensus_data = {refdir}
 
-        # Reference library for nitrogen cycle
-        of.write(('\n[nitrogen]\n'
-                  'functions_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv\n'
-                  'proteins_list_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_proteins.txt\n'
-                  'taxonomy_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_taxonomy.tsv\n'
-                  'reference_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_preselection_db_v.10.0.dmnd\n'
-                  'reference_db_size = 18389191\n'
-                  'background_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_classification_db_v.10.0.dmnd\n'
-                  'background_db_size = 64090633\n'))
+# Reference library for nitrogen cycle
+[nitrogen]
+functions_file = {refdir}/fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv
+proteins_list_file = {refdir}/fama_nitrogen-cycle_v.10.0_proteins.txt
+taxonomy_file = {refdir}/fama_nitrogen-cycle_v.10.0_taxonomy.tsv
+reference_diamond_db = {refdir}/fama_nitrogen-cycle_preselection_db_v.10.0.dmnd
+reference_db_size = 18388755
+background_diamond_db = {refdir}/fama_nitrogen-cycle_classification_db_v.10.0.dmnd
+background_db_size = 64090197
 
-        # Reference library for universal markers
-        of.write(('\n[universal]\n'
-                  'functions_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv\n'
-                  'proteins_list_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_proteins.txt\n'
-                  'taxonomy_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_taxonomy.tsv\n'
-                  'reference_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_preselection_db_v.10.0.dmnd\n'
-                  'reference_db_size = 18389191\n'
-                  'background_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_classification_db_v.10.0.dmnd\n'
-                  'background_db_size = 64090633\n'))
+# Reference library for universal markers
+[universal]
+functions_file = {refdir}/fama_universal_functions_thresholds_v.1.4.tsv
+proteins_list_file = {refdir}/fama_universal_proteins_v.1.4.txt
+taxonomy_file = {refdir}/fama_universal_taxonomy_v.1.4.tsv
+reference_diamond_db = {refdir}/fama_universal_preselection_db_v.10.0.dmnd
+reference_db_size = 31895938
+background_diamond_db = {refdir}/fama_universal_classification_db_v.10.0.dmnd
+background_db_size = 49177580
 
-        # Reference library for ribosomal protein L6
-        of.write(('\n[rpl6]\n'
-                  'functions_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv\n'
-                  'proteins_list_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_proteins.txt\n'
-                  'taxonomy_file = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_v.10.0_taxonomy.tsv\n'
-                  'reference_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_preselection_db_v.10.0.dmnd\n'
-                  'reference_db_size = 18389191\n'
-                  'background_diamond_db = '))
-        of.write(refdata_dir)
-        of.write(('fama_nitrogen-cycle_classification_db_v.10.0.dmnd\n'
-                  'background_db_size = 64090633\n'))
-
-        # Reference library for universal markers
-        # of.write(('\n[universal]\n'
-        #            'functions_file = /data/famaprofiling/fama_universal_functions.txt\n'
-        #            'proteins_list_file = /data/famaprofiling/fama_universal_db.txt\n'
-        #            'reference_diamond_db = /data/famaprofiling/fama_universal_db.dmnd\n'
-        #            'reference_db_size = 18204243\n'
-        #            'background_diamond_db = /data/famaprofiling/fama_background_db.dmnd\n'
-        #            'background_db_size = 4156041913\n'))
-        of.write('\n')
-
+# Reference library for ribosomal protein L6
+[rpl6]
+functions_file = {refdir}/fama_rpl6_functions_thresholds_v.1.2.tsv
+proteins_list_file = {refdir}/fama_rpl6_proteins_v.1.2.txt
+taxonomy_file = {refdir}/fama_rpl6_taxonomy_v.1.2.tsv
+reference_diamond_db = {refdir}/fama_rpl6_preselection_db_v.1.2.dmnd
+reference_db_size = 2095606
+background_diamond_db = {refdir}/fama_rpl6_classification_db_v.1.2.dmnd
+background_db_size = 4769946
+""".format(refdir = refdata_dir)
+        of.write(config)
     return ret_val
 
 
