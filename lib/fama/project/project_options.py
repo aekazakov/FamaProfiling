@@ -1,7 +1,6 @@
 """Descibes ProjectOptions class"""
 import os
 import configparser
-from fama.utils.utils import singleton
 
 
 class ProjectOptions(object):

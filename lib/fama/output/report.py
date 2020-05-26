@@ -421,7 +421,7 @@ def get_function_scores(project, sample_id=None, metric=None):
             print('Cannot get normalization factor for metric', metric, 'in sample', sample)
             print('Fall back to raw counts.')
             norm_factor = 1.0
-            if project.samples[sample].is_paired_end: 
+            if project.samples[sample].is_paired_end:
                 metric = 'fragmentcount'
             else:
                 metric = 'readcount'
@@ -750,7 +750,7 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
             print('Cannot get normalization factor for metric', metric, 'in sample', sample)
             print('Fall back to raw counts.')
             norm_factor = 1.0
-            if project.samples[sample].is_paired_end: 
+            if project.samples[sample].is_paired_end:
                 metric = 'fragmentcount'
             else:
                 metric = 'readcount'

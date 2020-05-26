@@ -83,7 +83,7 @@ class ReferenceData(object):
         try:
             ret_val = self.proteins_dict[protein]['function'].split('|')
         except KeyError:
-            #print('Protein', protein, 'not found in reference database. Unknown function reported')
+            # print('Protein', protein, 'not found in reference database. No function reported')
             ret_val.append('')
         return ret_val
 

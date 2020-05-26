@@ -193,7 +193,7 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
     output['report_files'] = output_files
     feature_ids = []
     for sample_id in project.list_samples():
-        for read_id,read in project.samples[sample_id].reads['pe1'].items():
+        for read_id, read in project.samples[sample_id].reads['pe1'].items():
             if read.status == STATUS_GOOD:
                 feature_ids.append(read_id)
     output['feature_ids'] = feature_ids
@@ -246,19 +246,13 @@ reference_diamond_db = {refdir}/fama_rpl6_preselection_db_v.1.2.dmnd
 reference_db_size = 2095606
 background_diamond_db = {refdir}/fama_rpl6_classification_db_v.1.2.dmnd
 background_db_size = 4769946
-""".format(refdir = refdata_dir)
+""".format(refdir=refdata_dir)
         of.write(config)
     return ret_val
 
 
 def write_project_file(fastq_fwd, fastq_rev, ref_dataset, work_dir):
     ret_val = os.path.join(work_dir, 'project.ini')
-    #fwd_read_count = get_read_count(fastq_fwd)
-    #~ if fastq_rev is None:
-        #~ fastq_rev = ''
-        #~ rev_read_count = ''
-    #~ else:
-        #~ rev_read_count = get_read_count(fastq_rev)
 
     with open(ret_val, 'w') as of:
         # Default section
@@ -280,13 +274,9 @@ def write_project_file(fastq_fwd, fastq_rev, ref_dataset, work_dir):
         of.write(work_dir)
         of.write('\n\n[sample]\nsample_id = KBase_sequences\nfastq_pe1 = ')
         of.write(fastq_fwd)
-        #~ of.write('\nfastq_pe1_readcount = ')
-        #~ of.write(str(fwd_read_count))
         if fastq_rev is not None:
             of.write('\nfastq_pe2 = ')
             of.write(fastq_rev)
-        #~ of.write('\nfastq_pe2_readcount =')
-        #~ of.write(str(rev_read_count))
         of.write('\nsample_dir = ')
         of.write(work_dir)
         of.write('\nreplicate = 0\n')
@@ -333,10 +323,3 @@ def write_filtered_fastq(fastq_fwd, fastq_rev, project):
                                 of2.write(read.pe_quality + '\n')
                                 reads_written.add(read_id)
     print('Reads exported', str(len(reads_written)*2))
-
-
-#~ def get_read_count(infile):
-    #~ ret_val = 0
-    #~ num_lines = sum(1 for line in open(infile))
-    #~ ret_val = int(num_lines/4)
-    #~ return ret_val
