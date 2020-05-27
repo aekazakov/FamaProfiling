@@ -230,9 +230,9 @@ background_db_size = 64090197
 functions_file = {refdir}/fama_universal_functions_thresholds_v.1.4.txt
 proteins_list_file = {refdir}/fama_universal_proteins_v.1.4.txt
 taxonomy_file = {refdir}/fama_universal_taxonomy_v.1.4.txt
-reference_diamond_db = {refdir}/fama_universal_preselection_db_v.1.4.dmnd
+reference_diamond_db = {refdir}/fama_universal-cycle_preselection_db_v.1.4.dmnd
 reference_db_size = 31895938
-background_diamond_db = {refdir}/fama_universal_classification_db_v.1.4.dmnd
+background_diamond_db = {refdir}/fama_universal-cycle_classification_db_v.1.4.dmnd
 background_db_size = 49177580
 
 # Reference library for ribosomal protein L6
