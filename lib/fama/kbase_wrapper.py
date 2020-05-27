@@ -227,7 +227,7 @@ background_db_size = 64090197
 
 # Reference library for universal markers
 [universal]
-functions_file = {refdir}/fama_universal_functions_thresholds_v.1.4.tsv
+functions_file = {refdir}/fama_universal_functions_thresholds_v.1.4.txt
 proteins_list_file = {refdir}/fama_universal_proteins_v.1.4.txt
 taxonomy_file = {refdir}/fama_universal_taxonomy_v.1.4.txt
 reference_diamond_db = {refdir}/fama_universal_preselection_db_v.10.0.dmnd
@@ -237,7 +237,7 @@ background_db_size = 49177580
 
 # Reference library for ribosomal protein L6
 [rpl6]
-functions_file = {refdir}/fama_rpl6_functions_thresholds_v.1.2.tsv
+functions_file = {refdir}/fama_rpl6_functions_thresholds_v.1.2.txt
 proteins_list_file = {refdir}/fama_rpl6_proteins_v.1.2.txt
 taxonomy_file = {refdir}/fama_rpl6_taxonomy_v.1.2.txt
 reference_diamond_db = {refdir}/fama_rpl6_preselection_db_v.1.2.dmnd
