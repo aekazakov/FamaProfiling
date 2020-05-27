@@ -267,7 +267,9 @@ class FamaProfiling:
                          'workspace_name': params['workspace_name'],
                          'html_window_height': 460}
         try:
+            self.log('Call KBaseReport at ' + str(self.callback_url))
             report = KBaseReport(self.callback_url)
+            self.log('Ready to save KBase report: ' + str(report_params))
             report_info = report.create_extended_report(report_params)
         except ServerError as kre:
             # not really any way to test this block
