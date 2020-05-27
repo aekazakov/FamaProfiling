@@ -233,6 +233,8 @@ class FamaProfiling:
             self.log('Logging exception loading results to shock')
             self.log(str(dfue))
             raise
+        self.log('HTML report saved: ' + str(dfu_output))
+
 
         html_links = [{'shock_id': dfu_output['shock_id'],
                        'description': 'HTML report for Fama App',
@@ -253,6 +255,8 @@ class FamaProfiling:
                 self.log(str(dfue))
                 raise
 
+        self.log('Krona chart saved: ' + str(dfu_output))
+
         # Save report
         report_params = {'message': message,
                          'objects_created':[{'ref': feature_set_obj_ref, 'description': 'Filtered genome features'}],
@@ -272,7 +276,7 @@ class FamaProfiling:
             raise
 
         report_info['report_params'] = report_params
-        self.log(str(report_info))
+        self.log('KBase report saved: ' + str(report_info))
         output = {
             'report_name': report_info['name'],
             'report_ref': report_info['ref']
@@ -286,6 +290,7 @@ class FamaProfiling:
                              'output is not type dict as required.')
         # return the results
         return [output]
+
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",
