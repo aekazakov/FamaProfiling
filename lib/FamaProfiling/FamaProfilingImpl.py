@@ -138,8 +138,15 @@ class FamaProfiling:
                          'report_object_name': 'fama_profiling_report_' + str(uuid.uuid4()),
                          'workspace_name': params['workspace_name'],
                          'html_window_height': 460}
-        report = KBaseReport(self.callback_url)
-        report_info = report.create_extended_report(report_params)
+        try:
+            report = KBaseReport(self.callback_url)
+            report_info = report.create_extended_report(report_params)
+        except ServerError as kre:
+            # not really any way to test this block
+            self.log('Logging exception saving report')
+            self.log(str(kre))
+            raise
+
         report_info['report_params'] = report_params
         self.log(str(report_info))
         output = {
@@ -206,8 +213,15 @@ class FamaProfiling:
                          'data': feature_set_data,
                          'name': params['output_feature_set_name']}]}
 
-        dfu_oi = dfu.save_objects(save_object_params)[0]
+        try:
+            dfu_oi = dfu.save_objects(save_object_params)[0]
+        except ServerError as dfue:
+            # not really any way to test this block
+            self.log('Logging exception saving feature set')
+            self.log(str(dfue))
+            raise
         feature_set_obj_ref = "{}/{}/{}".format(dfu_oi[6], dfu_oi[0], dfu_oi[4])
+        self.log('FeatureSet saved to ' + feature_set_obj_ref)
         
         # Write HTML output to workspace
         message = 'Fama protein functional profiling finished successfully'
@@ -248,8 +262,15 @@ class FamaProfiling:
                          'report_object_name': 'fama_profiling_report_' + str(uuid.uuid4()),
                          'workspace_name': params['workspace_name'],
                          'html_window_height': 460}
-        report = KBaseReport(self.callback_url)
-        report_info = report.create_extended_report(report_params)
+        try:
+            report = KBaseReport(self.callback_url)
+            report_info = report.create_extended_report(report_params)
+        except ServerError as kre:
+            # not really any way to test this block
+            self.log('Logging exception saving report')
+            self.log(str(kre))
+            raise
+
         report_info['report_params'] = report_params
         self.log(str(report_info))
         output = {

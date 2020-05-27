@@ -7,8 +7,6 @@ import zipfile
 from fama.utils.const import ENDS, STATUS_GOOD
 from fama.utils.utils import sanitize_file_name
 from fama.project.project import Project
-# from fama.se_functional_pipeline import fastq_pipeline
-# from fama.protein_functional_pipeline import protein_pipeline
 from fama.pe_functional_pipeline import fastq_pe_pipeline
 from fama.se_functional_pipeline import fastq_pipeline as fastq_se_pipeline
 from fama.protein_functional_pipeline import protein_pipeline

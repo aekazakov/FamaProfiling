@@ -70,25 +70,25 @@ class FamaProfilingTest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_pe_fama_profiling(self):
+    #~ def test_pe_fama_profiling(self):
 
-        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
-                                                                    'ref_dataset': 'nitrogen',
-#                                                                    'read_library_ref': '22763/10/1',  # 4706 read set (LARGE!)
-#                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
-                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
-#                                                                    'read_library_ref': ru_ret['obj_ref'], # tiny read set (20 + 20 reads), upload from local files
-                                                                    'output_read_library_name': 'Fama_se_test_output'})
-        print ('Report name', ret[0]['report_name'])
-        print ('Report reference', ret[0]['report_ref'])
+        #~ ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+                                                                    #~ 'ref_dataset': 'nitrogen',
+#~ #                                                                    'read_library_ref': '22763/10/1',  # 4706 read set (LARGE!)
+#~ #                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
+                                                                    #~ 'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
+#~ #                                                                    'read_library_ref': ru_ret['obj_ref'], # tiny read set (20 + 20 reads), upload from local files
+                                                                    #~ 'output_read_library_name': 'Fama_se_test_output'})
+        #~ print ('Report name', ret[0]['report_name'])
+        #~ print ('Report reference', ret[0]['report_ref'])
         
-    def test_se_fama_profiling(self):
-        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
-                                                                    'ref_dataset': 'nitrogen',
-                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
-                                                                    'output_read_library_name': 'Fama_se_test_output'})
-        print ('Report name', ret[0]['report_name'])
-        print ('Report reference', ret[0]['report_ref'])
+    #~ def test_se_fama_profiling(self):
+        #~ ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+                                                                    #~ 'ref_dataset': 'nitrogen',
+                                                                    #~ 'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
+                                                                    #~ 'output_read_library_name': 'Fama_se_test_output'})
+        #~ print ('Report name', ret[0]['report_name'])
+        #~ print ('Report reference', ret[0]['report_ref'])
         
         
     def test_protein_fama_profiling(self):

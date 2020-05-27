@@ -52,7 +52,6 @@ def import_protein_fasta(parser):
                 if seq_id in parser.reads:
                     current_id = line
                 else:
-                    print(seq_id, 'not found')
                     current_id = ''
                     seq_id = None
             else:
