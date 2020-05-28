@@ -18,32 +18,37 @@ def compose_run_info(project):
                       str(project.options.get_fastq2_readcount(sample_id)) +
                       '</p>')
     else:
-        result.append('<p>Total number of reads: ' +
+        result.append('<p>Total number of input sequences: ' +
                       str(project.options.get_fastq1_readcount(sample_id)) +
                       '</p>')
     result.append('<p>Reference data set: ' +
                   project.options.get_collection(sample_id) +
                   '</p>')
-    result.append('<p>Number of mapped reads, forward: ' +
-                  str(len(project.samples[sample_id].reads['pe1'])) +
-                  '</p>')
-    result.append('<p>Number of mapped reads, reverse: ' +
-                  str(len(project.samples[sample_id].reads['pe2'])) +
-                  '</p>')
+    if project.samples[sample_id].is_paired_end:
+        result.append('<p>Number of mapped reads, forward: ' +
+                      str(len(project.samples[sample_id].reads['pe1'])) +
+                      '</p>')
+        result.append('<p>Number of mapped reads, reverse: ' +
+                      str(len(project.samples[sample_id].reads['pe2'])) +
+                      '</p>')
+    else:
+        result.append('<p>Number of mapped sequences: ' +
+                      str(len(project.samples[sample_id].reads['pe1'])) +
+                      '</p>')
     if project.samples[sample_id].is_paired_end:
         result.append('<p>Predicted average insert size: ' +
                       '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
                       '</p>')
-    if (project.samples[sample_id].rpkg_scaling_factor == 0.0 or
-            project.samples[sample_id].rpkg_scaling_factor is None):
-        result.append('<p>Not enough data to predict average genome size.</p>')
-    else:
-        result.append('<p>Predicted average genome size: ' +
-                      '{0:.0f}'.format(
-                                        project.options.get_fastq1_basecount(sample_id) *
-                                        project.samples[sample_id].rpkg_scaling_factor
-                                        ) +
-                      '</p>')
+        if (project.samples[sample_id].rpkg_scaling_factor == 0.0 or
+                project.samples[sample_id].rpkg_scaling_factor is None):
+            result.append('<p>Average genome size was not calculated.</p>')
+        else:
+            result.append('<p>Predicted average genome size: ' +
+                          '{0:.0f}'.format(
+                                            project.options.get_fastq1_basecount(sample_id) *
+                                            project.samples[sample_id].rpkg_scaling_factor
+                                            ) +
+                          '</p>')
 
     return '\n'.join(result)
 
@@ -74,7 +79,7 @@ def compose_functional_profile(project):
     result.append('<table><thead><tr>')
     result.append('<th>Function</th><th>' + metric + '</th>')
     if metric != 'readcount':
-        result.append('<th>Raw read count</th>')
+        result.append('<th>Raw sequence count</th>')
     result.append('<th>Amino acid identity %, average</th>')
     result.append('<th>Description</th>')
     result.append('</thead></tr>')
@@ -126,7 +131,7 @@ def compose_function_groups(project):
     result.append('<table><thead><tr>')
     result.append('<th>Function category</th><th>' + metric + '</th>')
     if metric != 'readcount':
-        result.append('<th>Raw read count</th>')
+        result.append('<th>Raw sequence count</th>')
     result.append('<th>Amino acid identity %, average</th>')
     result.append('</thead></tr>')
 
