@@ -201,6 +201,8 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
     for sample_id in project.list_samples():
         for read_id, read in project.samples[sample_id].reads['pe1'].items():
             if read.status == STATUS_GOOD:
+                if '_CDS_' in read_id:
+                    read_id = read_id.split('_CDS_')[0]
                 feature_ids.append(read_id)
     output['feature_ids'] = feature_ids
     return output

@@ -84,7 +84,7 @@ def compose_functional_profile(project):
     result.append('<th>Description</th>')
     result.append('</thead></tr>')
 
-    for function in scores:
+    for function in sorted(scores.keys()):
         if sample_id in scores[function]:
             result.append('<tr><td>' + function + '</td>')
             result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) + '</td>')
