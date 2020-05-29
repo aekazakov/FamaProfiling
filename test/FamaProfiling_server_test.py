@@ -99,11 +99,4 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         
-    def test_protein_rpl6_fama_profiling(self):
-        ret = self.getImpl().run_FamaProteinProfiling(self.getContext(), {'workspace_name': self.getWsName(),
-                                                                    'ref_dataset': 'rpl6',
-                                                                    'genome_ref': '22763/32/1',  # S. oneidensis genome
-                                                                    'output_feature_set_name': 'Fama_protein_test_output'})
-        print ('Report name', ret[0]['report_name'])
-        print ('Report reference', ret[0]['report_ref'])
 

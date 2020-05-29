@@ -195,6 +195,41 @@ def compose_taxonomy_profile(project):
     return taxonomy_df.to_html(na_rep="")  # , float_format=lambda x: '%.2f' % x)
 
 
+def compose_protein_list(project):
+    result = []
+    sample_id = project.list_samples()[0]
+    metric = None
+    if 'pe1' in project.samples[sample_id].reads:
+        result.append('<table><thead><tr>')
+        result.append('<th>Protein</th>')
+        result.append('<th>Function</th>')
+        result.append('<th>Description</th>')
+        result.append('<th>Amino acid identity %</th>')
+        result.append('<th>Taxonomy</th>')
+        result.append('</thead></tr>')
+
+        for protein_id in sorted(project.samples[sample_id].reads['pe1'].keys()):
+            protein = project.samples[sample_id].reads['pe1'][protein_id]
+            if protein.status == 'function':
+                result.append('<tr><td>' + protein_id + '</td>')
+                fama_identity = sum(
+                    [x.identity for x in protein.hit_list.hits]
+                    ) / len(protein.hit_list.hits)
+                function = ','.join(sorted(protein.functions.keys()))
+                result.append('<td>' + function + '</td>')
+                description = '|'.join(
+                    sorted([
+                        project.ref_data.lookup_function_name(f) for f
+                        in protein.functions.keys()
+                        ])
+                    )
+                result.append('<td>' + description + '</td>')
+                result.append('<td>' + '{0:.1f}'.format(fama_identity) + '</td>')
+                result.append('<td>' + project.taxonomy_data.data[protein.taxonomy]['name'] + '</td></tr>')
+        result.append('</table>')
+    return '\n'.join(result)
+
+
 def generate_html_report(outfile, project):
     """ Generates HTML report """
     html_template = os.path.join(os.path.dirname(__file__), 'kbase_report.template')
@@ -214,5 +249,34 @@ def generate_html_report(outfile, project):
                         of.write(taxonomy_profile)
                     else:
                         of.write('<p>No taxonomy data</p>/n')
+                else:
+                    of.write(line + '\n')
+
+
+def generate_protein_html_report(outfile, project):
+    """ Generates HTML report for protein project """
+    html_template = os.path.join(os.path.dirname(__file__), 'kbase_protein_report.template')
+    with open(outfile, 'w') as of:
+        with open(html_template, 'r') as infile:
+            for line in infile:
+                line = line.rstrip('\n\r')
+                if line == '<\RunInfo>':
+                    of.write(compose_run_info(project))
+                elif line == '<\FunctionalProfile>':
+                    of.write(compose_functional_profile(project))
+                elif line == '<\FunctionGroups>':
+                    of.write(compose_function_groups(project))
+                elif line == '<\TaxonomyProfile>':
+                    taxonomy_profile = compose_taxonomy_profile(project)
+                    if taxonomy_profile:
+                        of.write(taxonomy_profile)
+                    else:
+                        of.write('<p>No taxonomy data</p>/n')
+                elif line == '<\ProteinList>':
+                    protein_list = compose_protein_list(project)
+                    if protein_list:
+                        of.write(protein_list)
+                    else:
+                        of.write('<p>No proteins mapped</p>/n')
                 else:
                     of.write(line + '\n')

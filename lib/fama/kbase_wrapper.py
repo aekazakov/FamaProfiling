@@ -10,7 +10,7 @@ from fama.project.project import Project
 from fama.pe_functional_pipeline import fastq_pe_pipeline
 from fama.se_functional_pipeline import fastq_pipeline as fastq_se_pipeline
 from fama.protein_functional_pipeline import protein_pipeline
-from fama.kbase_report import generate_html_report
+from fama.kbase_report import generate_html_report, generate_protein_html_report
 
 # How can I get reference data path from the server?
 refdata_dir = '/data/famaprofiling/1.4/'
@@ -132,7 +132,7 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
     sample_id = project.list_samples()[0]
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_html_report(out_report, project)
+    generate_protein_html_report(out_report, project)
     with zipfile.ZipFile(out_report + '.zip', 'w',
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
@@ -153,6 +153,14 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
         report_files[project_xlsx_report] = 'function_taxonomy_profile_short.xlsx'
     else:
         print('Project XLSX file not found:', project_xlsx_report)
+    project_text_report = sanitize_file_name(os.path.join(
+        project.options.work_dir,
+        'all_proteins.list.txt'
+        ))
+    if os.path.exists(project_text_report):
+        report_files[project_text_report] = 'proteins_list.txt'
+    else:
+        print('Proteins list not found:', project_text_report)
     sample_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         sample_id + '_' + metric + '_functions_taxonomy.xlsx'
