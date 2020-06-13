@@ -7,10 +7,13 @@ from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.GenomeFileUtilClient import GenomeFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.WorkspaceClient import Workspace
+
 from installed_clients.baseclient import ServerError 
 #from Fama.fastq_pipeline import functional_profiling_pipeline
 from fama.kbase_wrapper import pe_functional_profiling_pipeline as functional_profiling_pipeline
 from fama.kbase_wrapper import protein_functional_profiling_pipeline
+from fama.kbase_wrapper import save_domain_annotations
 #END_HEADER
 
 
@@ -29,9 +32,9 @@ class FamaProfiling:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.7"
+    VERSION = "0.1.0"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
-    GIT_COMMIT_HASH = "89bdfdfd9c524ddc705f031e06b0e1d55592a04b"
+    GIT_COMMIT_HASH = "380b16cff4d4a24cdd5040f5c59fbb5ea57561c9"
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
@@ -43,6 +46,7 @@ class FamaProfiling:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.callback_url = os.environ['SDK_CALLBACK_URL']
+        self.ws_url = config["workspace-url"]
         self.shared_folder = config['scratch']
         #END_CONSTRUCTOR
         pass
@@ -61,7 +65,9 @@ class FamaProfiling:
            String, parameter "ref_dataset" of String, parameter
            "output_read_library_name" of String
         :returns: instance of type "ReportResults" -> structure: parameter
-           "report_name" of String, parameter "report_ref" of String
+           "report_name" of String, parameter "report_ref" of String,
+           parameter "output_result_id" of type "domain_annotation_ref" (@id
+           ws KBaseGeneFamilies.DomainAnnotation)
         """
         # ctx is the context object
         # return variables are: output
@@ -168,12 +174,14 @@ class FamaProfiling:
            protein functional profiling module of Fama. workspace_name - the
            name of the workspace for input/output genome_ref - reference to a
            genome object ref_dataset - the name of Fama reference dataset
-           feature_set_ref - the name of the output FeatureSet) -> structure:
-           parameter "workspace_name" of String, parameter "genome_ref" of
-           String, parameter "ref_dataset" of String, parameter
-           "output_feature_set_name" of String
+           output_result_name - the name of the output DomainAnnotation) ->
+           structure: parameter "workspace_name" of String, parameter
+           "genome_ref" of String, parameter "ref_dataset" of String,
+           parameter "output_result_name" of String
         :returns: instance of type "ReportResults" -> structure: parameter
-           "report_name" of String, parameter "report_ref" of String
+           "report_name" of String, parameter "report_ref" of String,
+           parameter "output_result_id" of type "domain_annotation_ref" (@id
+           ws KBaseGeneFamilies.DomainAnnotation)
         """
         # ctx is the context object
         # return variables are: output
@@ -190,15 +198,23 @@ class FamaProfiling:
         gfu = GenomeFileUtil(self.callback_url)
         proteins = gfu.genome_proteins_to_fasta(protein2fasta_params)['file_path']
 
-        print('Input reads files:')
-        print('protein FASTA: ' + proteins)
-        print('reference: ' + fama_reference)
+        self.log('Input sequence file:' + proteins)
+        self.log('reference: ' + fama_reference)
 
         # Run Fama
         fama_output = protein_functional_profiling_pipeline(proteins, self.shared_folder, fama_reference)
-        
+
+        # Create domain_annotation with fama_output['feature_ids']
+        ws_client = Workspace(self.ws_url)
+        annotation_obj_ref, feature_ids = save_domain_annotations(project=fama_output['project'],
+                                         reference_id=fama_reference,
+                                         ws_name=params['workspace_name'],
+                                         ws_client=ws_client,
+                                         name=params['output_annotation_name'],
+                                         genome_ref=params['genome_ref'])
+
         # Create feature set with fama_output['feature_ids']
-        feature_ids = fama_output['feature_ids']
+        #feature_ids = fama_output['feature_ids']
         elements = {feature_id: [input_genome_ref] for feature_id in feature_ids}
         feature_set_data = {'description': 'Generated FeatureSet from Fama protein profiling',
                             'element_ordering': feature_ids,
@@ -206,6 +222,7 @@ class FamaProfiling:
 
         dfu = DataFileUtil(self.callback_url)
         workspace_id = dfu.ws_name_to_id(params['workspace_name'])
+
         object_type = 'KBaseCollections.FeatureSet'
         save_object_params = {
             'id': workspace_id,
@@ -259,7 +276,10 @@ class FamaProfiling:
 
         # Save report
         report_params = {'message': message,
-                         'objects_created':[{'ref': feature_set_obj_ref, 'description': 'Filtered genome features'}],
+                         'objects_created':[
+                            {'ref': feature_set_obj_ref, 'description': 'Filtered genome features'},
+                            {'ref': annotation_obj_ref, 'description': 'Functional annotations'}
+                         ],
                          'direct_html_link_index': 0,
                          'html_links': html_links,
                          'file_links': fama_output['report_files'],
@@ -292,7 +312,6 @@ class FamaProfiling:
                              'output is not type dict as required.')
         # return the results
         return [output]
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

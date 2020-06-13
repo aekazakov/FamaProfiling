@@ -42,9 +42,16 @@ parameters :
         ui-name : |
             Output Feature Set
         short-hint : |
-            Enter a name for the filtered feature set
+            Enter name for filtered feature set
         long-hint : |
-            Enter a name for the filtered feature set
+            Enter name for filtered feature set
+    output_annotation_name:
+        ui-name : |
+            Output Annotations
+        short-hint : |
+            Enter name for functional annotations object
+        long-hint : |
+            Enter name for functional annotations object
 
 description : |
     <p>This is a KBase wrapper for protein functional profiling module of Fama.</p>

@@ -87,7 +87,10 @@ def compose_functional_profile(project):
     for function in sorted(scores.keys()):
         if sample_id in scores[function]:
             result.append('<tr><td>' + function + '</td>')
-            result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) + '</td>')
+            if metric in ('readcount', 'fragmentcount'):
+                result.append('<td>' + str(int(scores[function][sample_id][metric])) + '</td>')
+            else:
+                result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) + '</td>')
             if metric != 'readcount':
                 result.append('<td>' +
                               '{0:.0f}'.format(scores[function][sample_id]['count']) + '</td>'
@@ -147,7 +150,10 @@ def compose_function_groups(project):
                 category_data[sample]['hit_count'] += scores[function][sample]['hit_count']
 
         result.append('<tr><td>' + category + '</td>')
-        result.append('<td>' + '{0:.5f}'.format(category_data[sample_id][metric]) + '</td>')
+        if metric in ('readcount', 'fragmentcount'):
+            result.append('<td>' + str(int(category_data[sample_id][metric])) + '</td>')
+        else:
+            result.append('<td>' + '{0:.5f}'.format(category_data[sample_id][metric]) + '</td>')
         if metric != 'readcount':
             result.append('<td>' + '{0:.0f}'.format(category_data[sample_id]['count']) + '</td>')
         result.append('<td>' + '{0:.2f}'.format(
@@ -198,7 +204,6 @@ def compose_taxonomy_profile(project):
 def compose_protein_list(project):
     result = []
     sample_id = project.list_samples()[0]
-    metric = None
     if 'pe1' in project.samples[sample_id].reads:
         result.append('<table><thead><tr>')
         result.append('<th>Protein</th>')
@@ -225,7 +230,8 @@ def compose_protein_list(project):
                     )
                 result.append('<td>' + description + '</td>')
                 result.append('<td>' + '{0:.1f}'.format(fama_identity) + '</td>')
-                result.append('<td>' + project.taxonomy_data.data[protein.taxonomy]['name'] + '</td></tr>')
+                result.append('<td>' + project.taxonomy_data.data[protein.taxonomy]['name'] +
+                              '</td></tr>')
         result.append('</table>')
     return '\n'.join(result)
 

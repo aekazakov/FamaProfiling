@@ -26,7 +26,7 @@ module FamaProfiling {
     workspace_name - the name of the workspace for input/output
     genome_ref - reference to a genome object
     ref_dataset - the name of Fama reference dataset
-    feature_set_ref - the name of the output FeatureSet
+    output_result_name - the name of the output DomainAnnotation
 
     */
     typedef structure {
@@ -34,8 +34,14 @@ module FamaProfiling {
         string genome_ref;
         string ref_dataset;
         string output_feature_set_name;
+        string output_annotation_name;
     } FamaProteinProfilingParams;
 
+    /* 
+    @id ws KBaseGeneFamilies.DomainAnnotation
+    */
+    typedef string domain_annotation_ref;
+    
     typedef structure {
         string report_name;
         string report_ref;

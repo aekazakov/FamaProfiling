@@ -62,6 +62,18 @@
                 "valid_ws_types" : [],
                 "is_output_name":true
             }
+        },
+        {
+            "id" : "output_annotation_name",
+            "optional" : false,
+            "advanced" : false,
+            "allow_multiple" : false,
+            "default_values" : [ "Fama.functional.annotations" ],
+            "field_type" : "text",
+            "text_options" : {
+                "valid_ws_types" : [],
+                "is_output_name":true
+            }
         }
     ],
     "behavior": {
@@ -86,6 +98,10 @@
                 {
                     "input_parameter": "output_feature_set_name",
                     "target_property": "output_feature_set_name"
+                },
+                {
+                    "input_parameter": "output_annotation_name",
+                    "target_property": "output_annotation_name"
                 }
             ],
             "output_mapping": [
