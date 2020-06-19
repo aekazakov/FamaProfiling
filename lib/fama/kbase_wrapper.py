@@ -492,9 +492,15 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
             identifier = feature['cdss'][0]
         elif 'aliases' in feature:
             for alias in feature['aliases']:
-                if alias in annotated_features:
-                    identifier = alias
-                    break
+                if isinstance(alias, list):
+                    if alias[1] in annotated_features:
+                        identifier = alias
+                        break
+                else:
+                    # for compatibility with KBase.Genome version 8.3 and below
+                    if alias in annotated_features:
+                        identifier = alias
+                        break
         
         if identifier is None:
             continue

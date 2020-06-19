@@ -31,3 +31,10 @@
 0.0.6
 -----
 * Reference data moved
+
+0.1.0
+-----
+* Added run_FamaProteinProfiling for protein-based sequence search in KBase genomes. Results are saved as DomainAnnotation and FeatureSet objects
+* Updated report in HTML format
+* Krona chart generation for taxonomic profiles
+
