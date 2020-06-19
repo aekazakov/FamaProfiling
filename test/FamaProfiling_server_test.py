@@ -70,7 +70,7 @@ class FamaProfilingTest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    #@unittest.skip("")
+    @unittest.skip("")
     def test_pe_fama_profiling(self):
 
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
@@ -83,7 +83,7 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         
-    #@unittest.skip("")
+    @unittest.skip("")
     def test_se_fama_profiling(self):
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
                                                                     'ref_dataset': 'nitrogen',

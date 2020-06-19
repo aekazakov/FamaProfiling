@@ -258,7 +258,7 @@ class FamaProfiling:
                 dfu_output = dfu.file_to_shock({'file_path': krona_file})
                 html_links.append({'shock_id': dfu_output['shock_id'],
                                    'description': 'Krona chart for function taxonomy profile',
-                                   'name': krona_file,
+                                   'name': krona_file.split('/')[-1],
                                    'label': 'Function taxonomy profile chart'}
                                   )
             except ServerError as dfue:

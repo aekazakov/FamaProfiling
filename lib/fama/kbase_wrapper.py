@@ -215,8 +215,8 @@ def protein_functional_profiling_pipeline(params):
             with zipfile.ZipFile(krona_output + '.zip', 'w',
                                  zipfile.ZIP_DEFLATED,
                                  allowZip64=True) as zip_file:
-                zip_file.write(krona_output, 'function_taxonomy_profile_chart.html')
-            report_files[krona_output + '.zip'] = sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
+                zip_file.write(krona_output, sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html'))
+            report_files[krona_output] = sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
             output['krona_charts'].append(krona_output + '.zip')
         else:
             print('Krona diagram file not found:', krona_file)
@@ -233,7 +233,7 @@ def protein_functional_profiling_pipeline(params):
                          allowZip64=True) as zip_file:
         zip_file.write(out_report, 'fama_report.html')
     output['html_report'] = out_report + '.zip'
-    report_files[out_report + '.zip'] = 'fama_report.html'
+    report_files[out_report] = 'fama_report.html'
         
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
