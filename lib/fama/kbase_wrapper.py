@@ -401,7 +401,7 @@ def create_dms(ref_path, ref_name, ref_version, ws_name, ws_client):
     # make domain library
     dlib = {'id': '',
         'source': 'Fama',
-        'source_url': 'https://iseq.lbl.gov',
+        'source_url': 'https://iseq.lbl.gov/fama/reference/' + ref_name + '/',
         'version': ref_version,
         'release_date': date,
         'program': program_version,
