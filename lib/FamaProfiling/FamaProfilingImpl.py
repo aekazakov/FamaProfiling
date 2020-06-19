@@ -253,12 +253,12 @@ class FamaProfiling:
                        'name': 'fama_report.html',
                        'label': 'Fama_report'}
                       ]
-        if 'krona_chart' in fama_output:
+        for krona_file in fama_output['krona_charts']:
             try:
-                dfu_output = dfu.file_to_shock({'file_path': fama_output['krona_chart']})
+                dfu_output = dfu.file_to_shock({'file_path': krona_file})
                 html_links.append({'shock_id': dfu_output['shock_id'],
                                    'description': 'Krona chart for function taxonomy profile',
-                                   'name': 'function_taxonomy_profile_chart.html',
+                                   'name': krona_file,
                                    'label': 'Function taxonomy profile chart'}
                                   )
             except ServerError as dfue:

@@ -8,6 +8,7 @@ from fama.output.report import get_function_scores, get_function_taxonomy_scores
 
 
 def compose_run_info(project, sample_labels, tab_index):
+    """ Makes content for 'Run info' tab """
     result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     result.append('<p>Reference data set: ' +
                   project.options.get_collection() +
@@ -59,6 +60,7 @@ def compose_run_info(project, sample_labels, tab_index):
 
 
 def compose_functional_profile(project, sample_id, tab_index):
+    """ Makes table with functional profile """
     result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     metric = None
     if project.samples[sample_id].is_paired_end:
@@ -110,6 +112,7 @@ def compose_functional_profile(project, sample_id, tab_index):
 
 
 def compose_function_groups(project, sample_id, tab_index):
+    """ Makes table of functional groups """
     result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     metric = None
     if project.samples[sample_id].is_paired_end:
@@ -170,6 +173,7 @@ def compose_function_groups(project, sample_id, tab_index):
 
 
 def compose_taxonomy_profile(project, sample_id, tab_index):
+    """Makes taxonomy profile """
     metric = None
     if project.samples[sample_id].is_paired_end:
         if (project.samples[sample_id].rpkg_scaling_factor != 0.0 and
@@ -209,6 +213,7 @@ def compose_taxonomy_profile(project, sample_id, tab_index):
 
 
 def compose_protein_list(project, sample_labels, tab_index):
+    """ Makes table of proteins """
     result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     result.append('<table><thead><tr>')
     result.append('<th>Input object</th>')
@@ -306,24 +311,3 @@ def generate_protein_html_report(outfile, project, sample_labels):
                     of.write('\n'.join(report_tabs))
                 else:
                     of.write(line + '\n')
-
-                #~ if line == '<\RunInfo>':
-                    #~ of.write(compose_run_info(project))
-                #~ elif line == '<\FunctionalProfile>':
-                    #~ of.write(compose_functional_profile(project))
-                #~ elif line == '<\FunctionGroups>':
-                    #~ of.write(compose_function_groups(project))
-                #~ elif line == '<\TaxonomyProfile>':
-                    #~ taxonomy_profile = compose_taxonomy_profile(project)
-                    #~ if taxonomy_profile:
-                        #~ of.write(taxonomy_profile)
-                    #~ else:
-                        #~ of.write('<p>No taxonomy data</p>/n')
-                #~ elif line == '<\ProteinList>':
-                    #~ protein_list = compose_protein_list(project)
-                    #~ if protein_list:
-                        #~ of.write(protein_list)
-                    #~ else:
-                        #~ of.write('<p>No proteins mapped</p>/n')
-                #~ else:
-                    #~ of.write(line + '\n')
