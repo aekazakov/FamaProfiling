@@ -31,7 +31,7 @@ module FamaProfiling {
     */
     typedef structure {
         string workspace_name;
-        string genome_ref;
+        list<string> genome_ref;
         string ref_dataset;
         string output_feature_set_name;
         string output_annotation_name;

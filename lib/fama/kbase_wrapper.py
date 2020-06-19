@@ -14,15 +14,24 @@ from fama.kbase_report import generate_html_report, generate_protein_html_report
 
 # How can I get reference data path from the server?
 refdata_dir = '/data/famaprofiling/1.4/'
+ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
+    'universal': 'Fama_universal_v.1.4_function_set',
+    'rpl6': 'Fama_rpl6_v.1.2_function_set'
+    }
 
 
-def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset):
+def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset, input_ref):
     """Function calling functional profiling for fastq files"""
     work_dir = os.path.join(scratch, str(uuid.uuid4()))
     os.mkdir(work_dir)
 
     config_file = write_config_file(work_dir)
-    project_file = write_project_file(fastq_fwd, fastq_rev, ref_dataset, work_dir)
+    input_paths = {}
+    input_paths[input_ref] = {}
+    input_paths[input_ref]['fwd_path'] = fastq_fwd
+    if fastq_rev is not None:
+        input_paths[input_ref]['rev_path'] = fastq_rev
+    project_file = write_project_file(input_paths, ref_dataset, work_dir)
     project = Project(config_file=config_file, project_file=project_file)
 
     if fastq_rev is None:
@@ -31,6 +40,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset)
         project = fastq_pe_pipeline(project)
 
     out_dir = os.path.join(work_dir, 'out')
+    os.mkdir(out_dir)
     # export_reads
     output = {}
     out_fwd_fastq = os.path.join(work_dir, 'out_fwd.fastq')
@@ -48,7 +58,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset)
 
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_html_report(out_report, project)
+    generate_html_report(out_report, project, {}) #TODO: add object names
     with zipfile.ZipFile(out_report + '.zip', 'w',
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
@@ -115,35 +125,38 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset)
     return output
 
 
-def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
-    """Function calling functional profiling for protein fasta file"""
-    work_dir = os.path.join(scratch, str(uuid.uuid4()))
+def protein_functional_profiling_pipeline(params):
+    """Function calling functional profiling for protein fasta file
+    params = {'input_proteins': input_proteins,
+               'work_dir': self.shared_folder,
+               'reference': fama_reference,
+               'ws_name': params['workspace_name'],
+               'ws_client': ws_client,
+               'featureset_name': params['output_feature_set_name'],
+               'annotation_prefix': params['output_annotation_name']
+             }
+    """
+
+    work_dir = os.path.join(params['work_dir'], str(uuid.uuid4()))
     os.mkdir(work_dir)
 
     config_file = write_config_file(work_dir)
-    project_file = write_project_file(fasta_path, None, ref_dataset, work_dir)
+    project_file = write_project_file(params['input_proteins'], params['reference'], work_dir)
     project = Project(config_file=config_file, project_file=project_file)
+    # Run Fama
     project = protein_pipeline(project)
 
     out_dir = os.path.join(work_dir, 'out')
+    os.mkdir(out_dir)
     # export_reads
     output = {}
 
-    sample_id = project.list_samples()[0]
+    #sample_id = project.list_samples()[0]
     # Generate output
-    out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_protein_html_report(out_report, project)
-    with zipfile.ZipFile(out_report + '.zip', 'w',
-                         zipfile.ZIP_DEFLATED,
-                         allowZip64=True) as zip_file:
-        zip_file.write(out_report, 'fama_report.html')
-    output['html_report'] = out_report + '.zip'
 
-    # TODO: Krona charts generate_functions_chart(parser_fwd)
+
     report_files = {}
     metric = 'readcount'
-
-    report_files[out_report + '.zip'] = 'fama_report.html'
 
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
@@ -161,30 +174,67 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
         report_files[project_text_report] = 'proteins_list.txt'
     else:
         print('Proteins list not found:', project_text_report)
-    sample_xlsx_report = sanitize_file_name(os.path.join(
-        project.options.work_dir,
-        sample_id + '_' + metric + '_functions_taxonomy.xlsx'
-        ))
-    if os.path.exists(sample_xlsx_report):
-        report_files[sample_xlsx_report] = 'function_taxonomy_profile_full.xlsx'
-    else:
-        print('Sample XLSX file not found:', sample_xlsx_report)
-    krona_file = sanitize_file_name(os.path.join(
-        project.options.work_dir,
-        sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
-        ))
-    if os.path.exists(krona_file):
-        krona_output = os.path.join(out_dir, 'function_taxonomy_profile_chart.html')
-        shutil.copy2(krona_file, krona_output)
-        with zipfile.ZipFile(krona_output + '.zip', 'w',
-                             zipfile.ZIP_DEFLATED,
-                             allowZip64=True) as zip_file:
-            zip_file.write(krona_output, 'function_taxonomy_profile_chart.html')
-        report_files[krona_output + '.zip'] = 'function_taxonomy_profile_chart.html'
-        output['krona_chart'] = krona_output + '.zip'
-    else:
-        print('Krona diagram file not found:', krona_file)
 
+    featureset_elements = {}
+    featureset_element_ordering = []
+    objects_created = []
+    genome_names = {}
+    # Get Domain Model Set reference
+    dms_ref = get_dms(params['reference'], 
+                      project.config.get_functions_file(project.collection),
+                      params['ws_name'],
+                      params['ws_client']
+                      )
+
+    for sample_id in project.list_samples():
+        sample_xlsx_report = sanitize_file_name(os.path.join(
+            project.options.work_dir,
+            sample_id + '_' + metric + '_functions_taxonomy.xlsx'
+            ))
+        if os.path.exists(sample_xlsx_report):
+            report_files[sample_xlsx_report] = 'function_taxonomy_profile_full.xlsx'
+        else:
+            print('Sample XLSX file not found:', sample_xlsx_report)
+        krona_file = sanitize_file_name(os.path.join(
+            project.options.work_dir,
+            sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
+            ))
+
+        if os.path.exists(krona_file):
+            krona_output = os.path.join(out_dir, 'function_taxonomy_profile_chart.html')
+            shutil.copy2(krona_file, krona_output)
+            with zipfile.ZipFile(krona_output + '.zip', 'w',
+                                 zipfile.ZIP_DEFLATED,
+                                 allowZip64=True) as zip_file:
+                zip_file.write(krona_output, 'function_taxonomy_profile_chart.html')
+            report_files[krona_output + '.zip'] = 'function_taxonomy_profile_chart.html'
+            output['krona_chart'] = krona_output + '.zip'
+        else:
+            print('Krona diagram file not found:', krona_file)
+        
+        #annotation_name = params['annotation_prefix'] + genome_name(sample_id)
+        annotation_obj_ref, feature_ids, genome_name = save_domain_annotations(project, dms_ref, params['ws_name'], params['ws_client'], params['annotation_prefix'], sample_id)
+        genome_names[sample_id] = genome_name
+        objects_created.append({'ref': annotation_obj_ref, 'description': 'Functional annotations for genome ' + project.samples[sample_id].sample_name})
+        for feature_id in feature_ids:
+            if feature_id not in featureset_elements:
+                featureset_elements[feature_id] = []
+            featureset_elements[feature_id].append(project.samples[sample_id].sample_name)
+            featureset_element_ordering.append(feature_id)
+
+    feature_set_data = {'description': 'FeatureSet generated by Fama protein profiling',
+                        'element_ordering': featureset_element_ordering,
+                        'elements': featureset_elements}
+
+    out_report = os.path.join(out_dir, 'fama_report.html')
+    generate_protein_html_report(out_report, project, genome_names)
+    with zipfile.ZipFile(out_report + '.zip', 'w',
+                         zipfile.ZIP_DEFLATED,
+                         allowZip64=True) as zip_file:
+        zip_file.write(out_report, 'fama_report.html')
+    output['html_report'] = out_report + '.zip'
+    report_files[out_report + '.zip'] = 'fama_report.html'
+        
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
     with zipfile.ZipFile(result_file, 'w',
@@ -197,13 +247,9 @@ def protein_functional_profiling_pipeline(fasta_path, scratch, ref_dataset):
                          'label': os.path.basename(result_file),
                          'description': 'Files generated by Fama App'})
     output['report_files'] = output_files
-    #~ feature_ids = []
-    #~ for sample_id in project.list_samples():
-        #~ for read_id, read in project.samples[sample_id].reads['pe1'].items():
-            #~ if read.status == STATUS_GOOD:
-                #~ feature_ids.append(read_id)
-    #~ output['feature_ids'] = feature_ids
     output['project'] = project
+    output['feature_set_data'] = feature_set_data
+    output['objects_created'] = objects_created
     return output
 
 
@@ -258,7 +304,7 @@ background_db_size = 4769946
     return ret_val
 
 
-def write_project_file(fastq_fwd, fastq_rev, ref_dataset, work_dir):
+def write_project_file(input_paths, ref_dataset, work_dir):
     ret_val = os.path.join(work_dir, 'project.ini')
 
     with open(ret_val, 'w') as of:
@@ -279,15 +325,15 @@ def write_project_file(fastq_fwd, fastq_rev, ref_dataset, work_dir):
                   'reads_json_name = reads.json\n'
                   'work_dir = '))
         of.write(work_dir)
-        of.write('\n\n[sample]\nsample_id = KBase_sequences\nfastq_pe1 = ')
-        of.write(fastq_fwd)
-        if fastq_rev is not None:
-            of.write('\nfastq_pe2 = ')
-            of.write(fastq_rev)
-        of.write('\nsample_dir = ')
-        of.write(work_dir)
-        of.write('\nreplicate = 0\n')
-
+        for sample_id in input_paths:
+            of.write('\n\n[' + sanitize_sample_id(sample_id) + ']\nsample_id = ' + sample_id + '\nfastq_pe1 = ')
+            of.write(input_paths[sample_id]['fwd_path'])
+            if 'rev_path' in input_paths[sample_id]:
+                of.write('\nfastq_pe2 = ')
+                of.write(input_paths[sample_id]['rev_path'])
+            of.write('\nsample_dir = ')
+            of.write(os.path.join(work_dir, sanitize_sample_id(sample_id)))
+            of.write('\nreplicate = 0\n')
     return ret_val
 
 
@@ -384,11 +430,8 @@ def create_dms(ref_path, ref_name, ref_version, ws_name, ws_client):
     dms_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
     return dms_id
 
-def save_domain_annotations(project, reference_id, ws_name, ws_client, name, genome_ref):
-    ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
-        'universal': 'Fama_universal_v.1.4_function_set',
-        'rpl6': 'Fama_rpl6_v.1.2_function_set'
-        }
+
+def get_dms(reference_id, ref_path, ws_name, ws_client):
 
     # check if DomainModelSet exists
     dms_type = 'KBaseGeneFamilies.DomainModelSet'
@@ -404,18 +447,24 @@ def save_domain_annotations(project, reference_id, ws_name, ws_client, name, gen
         print(str(wse))
 
     if dms_ref is None:
-        ref_path = project.config.get_functions_file(project.collection)
         dms_ref = create_dms(ref_path, reference_id, ref_model_set_names[reference_id].split('_')[-3], ws_name, ws_client)
+    return dms_ref
+
+
+def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, sample_id):
+
+    #~ ref_path = project.config.get_functions_file(project.collection)
+    #~ dms_ref = get_dms(reference_id, ref_path, ws_name, ws_client)
+
     
-    ret = ws_client.get_objects2({'objects':[{'ref': genome_ref}]})
+    ret = ws_client.get_objects2({'objects':[{'ref': project.samples[sample_id].sample_name}]})
     genome = ret['data'][0]['data']
-    print(str(genome['features'][0]))
+    genome_name = ret['data'][0]['info'][1]
     
     annotated_features = set()
-    for sample_id in project.list_samples():
-        for read_id, read in project.samples[sample_id].reads['pe1'].items():
-            if read.status == STATUS_GOOD:
-                annotated_features.add(read_id)
+    for read_id, read in project.samples[sample_id].reads['pe1'].items():
+        if read.status == STATUS_GOOD:
+            annotated_features.add(read_id)
     
     data = {}
     contig_to_size_and_feature_count = {}
@@ -471,7 +520,7 @@ def save_domain_annotations(project, reference_id, ws_name, ws_client, name, gen
         feature_to_contig_and_index[identifier] = (contig, feature_index)
     contig_to_size_and_feature_count[prev_contig] = (feature_count, max_start)
 
-    annotation_obj = {'genome_ref': genome_ref,
+    annotation_obj = {'genome_ref': project.samples[sample_id].sample_name,
                       'used_dms_ref': dms_ref,
                       'data': data,
                       'contig_to_size_and_feature_count': contig_to_size_and_feature_count,
@@ -479,9 +528,14 @@ def save_domain_annotations(project, reference_id, ws_name, ws_client, name, gen
                       }
     
     ret = ws_client.save_objects({'workspace': ws_name,
-                                     'objects': [{'name': name,
+                                     'objects': [{'name': name_prefix + genome_name,
                                                  'type': u'KBaseGeneFamilies.DomainAnnotation',
                                                  'data': annotation_obj}]})
     print(ret)
     result = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
-    return result, feature_ids
+    return result, feature_ids, genome_name
+
+
+def sanitize_sample_id(sample_id):
+    """Replaces slashes with underscores, so KBase refs could be used as sample IDs"""
+    return sample_id.replace('/', '_')

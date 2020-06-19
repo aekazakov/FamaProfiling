@@ -26,11 +26,11 @@ suggestions:
 parameters :
     genome_ref :
         ui-name : |
-            Genome
+            Genomes
         short-hint : |
-            Genome object
+            Select genome objects
         long-hint : |
-            Genome object
+            Select genome objects
     ref_dataset:
         ui-name : |
             Reference Dataset
@@ -40,18 +40,18 @@ parameters :
             Choose one of the reference datasets for profiling: nitrogen cycle proteins, unversal marker proteins, ribosomal protein L6
     output_feature_set_name:
         ui-name : |
-            Output Feature Set
+            Output Feature Set name
         short-hint : |
             Enter name for filtered feature set
         long-hint : |
             Enter name for filtered feature set
     output_annotation_name:
         ui-name : |
-            Output Annotations
+            Annotation prefix
         short-hint : |
-            Enter name for functional annotations object
+            Prefix for annotation names, to be added to genome names
         long-hint : |
-            Enter name for functional annotations object
+            Enter prefix for names of functional annotations objects
 
 description : |
     <p>This is a KBase wrapper for protein functional profiling module of Fama.</p>

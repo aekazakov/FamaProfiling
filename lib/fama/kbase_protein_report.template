@@ -102,29 +102,9 @@ div.desc {
   </header>
 
 <div class="tab">
-    <button class="tablinks" onclick="openTab(event, 'tab1')" id="defaultOpen">Run info</button>
-    <button class="tablinks" onclick="openTab(event, 'tab2')" id="defaultOpen">Functional profile</button>
-    <button class="tablinks" onclick="openTab(event, 'tab3')" id="defaultOpen">Functions by category</button>
-    <button class="tablinks" onclick="openTab(event, 'tab4')" id="defaultOpen">Taxonomy profile</button>
-    <button class="tablinks" onclick="openTab(event, 'tab5')" id="defaultOpen">Protein list</button>
+<\InsertButtons>
 </div>
-    <div id="tab1" class="tabcontent">
-<\RunInfo>
-    </div>
-
-    <div id="tab2" class="tabcontent">
-<\FunctionalProfile>
-    </div>
-    <div id="tab3" class="tabcontent">
-<\FunctionGroups>
-    </div>
-    <div id="tab4" class="tabcontent">
-<\TaxonomyProfile>
-    </div>
-    <div id="tab5" class="tabcontent">
-<\ProteinList>
-    </div>
-  </div>
+<\InsertTabs>
         
 <script>
 function openTab(evt, tabName) {

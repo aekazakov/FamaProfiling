@@ -102,25 +102,9 @@ div.desc {
   </header>
 
 <div class="tab">
-    <button class="tablinks" onclick="openTab(event, 'test1')" id="defaultOpen">Run info</button>
-    <button class="tablinks" onclick="openTab(event, 'test2')" id="defaultOpen">Functional profile</button>
-    <button class="tablinks" onclick="openTab(event, 'test3')" id="defaultOpen">Functions by category</button>
-    <button class="tablinks" onclick="openTab(event, 'test4')" id="defaultOpen">Taxonomy profile</button>
+<\InsertButtons>
 </div>
-    <div id="test1" class="tabcontent">
-<\RunInfo>
-    </div>
-
-    <div id="test2" class="tabcontent">
-<\FunctionalProfile>
-    </div>
-    <div id="test3" class="tabcontent">
-<\FunctionGroups>
-    </div>
-    <div id="test4" class="tabcontent">
-<\TaxonomyProfile>
-    </div>
-  </div>
+<\InsertTabs>
         
 <script>
 function openTab(evt, tabName) {

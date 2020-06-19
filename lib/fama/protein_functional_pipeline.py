@@ -316,16 +316,6 @@ def functional_profiling_pipeline(project, sample):
     # Process output of background DB search
     parse_background_output(parser)
 
-#    if not parser.reads:
-#        print ('Import JSON file')
-#        parser.reads = import_annotated_reads(
-#            os.path.join(parser.options.get_project_dir(sample),
-#            sample + '_pe1_' + parser.options.get_reads_json_name())
-#        )
-
-    # calculate_protein_coverage(parser, coverage_file)
-    # calculate_protein_coverage_smooth(parser, coverage_file)
-
     print('Exporting JSON')
     parser.export_read_fasta()
     export_annotated_reads(parser)

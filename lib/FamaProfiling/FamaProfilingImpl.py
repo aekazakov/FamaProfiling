@@ -34,7 +34,7 @@ class FamaProfiling:
     ######################################### noqa
     VERSION = "0.1.0"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
-    GIT_COMMIT_HASH = "380b16cff4d4a24cdd5040f5c59fbb5ea57561c9"
+    GIT_COMMIT_HASH = "2c7f322618c0dde0a9c1a9b0af61b5d8a297879b"
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
@@ -65,9 +65,7 @@ class FamaProfiling:
            String, parameter "ref_dataset" of String, parameter
            "output_read_library_name" of String
         :returns: instance of type "ReportResults" -> structure: parameter
-           "report_name" of String, parameter "report_ref" of String,
-           parameter "output_result_id" of type "domain_annotation_ref" (@id
-           ws KBaseGeneFamilies.DomainAnnotation)
+           "report_name" of String, parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
@@ -90,7 +88,7 @@ class FamaProfiling:
         print('reverse: ' + str(rev_reads_file))
 
         # Run Fama
-        fama_output = functional_profiling_pipeline(fwd_reads_file, rev_reads_file, self.shared_folder, fama_reference)
+        fama_output = functional_profiling_pipeline(fwd_reads_file, rev_reads_file, self.shared_folder, fama_reference, params['read_library_ref'])
         
         # Write filtered reads to workspace
         reads_params = {'fwd_file': fama_output['fwd_reads'],
@@ -176,49 +174,44 @@ class FamaProfiling:
            genome object ref_dataset - the name of Fama reference dataset
            output_result_name - the name of the output DomainAnnotation) ->
            structure: parameter "workspace_name" of String, parameter
-           "genome_ref" of String, parameter "ref_dataset" of String,
-           parameter "output_result_name" of String
+           "genome_ref" of list of String, parameter "ref_dataset" of String,
+           parameter "output_feature_set_name" of String, parameter
+           "output_annotation_name" of String
         :returns: instance of type "ReportResults" -> structure: parameter
-           "report_name" of String, parameter "report_ref" of String,
-           parameter "output_result_id" of type "domain_annotation_ref" (@id
-           ws KBaseGeneFamilies.DomainAnnotation)
+           "report_name" of String, parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
         #BEGIN run_FamaProteinProfiling
 
         # Import protein sequences from input genome_ref
-        input_genome_ref = params['genome_ref']
+        input_genome_refs = params['genome_ref']
         fama_reference = params['ref_dataset']
+        input_proteins = {}
+        for input_genome_ref in input_genome_refs:
+            input_proteins[input_genome_ref] = {}
+            protein2fasta_params = {'genome_ref': input_genome_ref,
+                            'include_functions': 'false',
+                            'include_aliases': 'false'
+                            }
+            gfu = GenomeFileUtil(self.callback_url)
+            proteins = gfu.genome_proteins_to_fasta(protein2fasta_params)['file_path']
+            input_proteins[input_genome_ref]['fwd_path'] = proteins
 
-        protein2fasta_params = {'genome_ref': input_genome_ref,
-                        'include_functions': 'false',
-                        'include_aliases': 'false'
-                        }
-        gfu = GenomeFileUtil(self.callback_url)
-        proteins = gfu.genome_proteins_to_fasta(protein2fasta_params)['file_path']
-
-        self.log('Input sequence file:' + proteins)
-        self.log('reference: ' + fama_reference)
-
-        # Run Fama
-        fama_output = protein_functional_profiling_pipeline(proteins, self.shared_folder, fama_reference)
-
-        # Create domain_annotation with fama_output['feature_ids']
+        self.log('Input sequence files:', str(input_proteins))
+        self.log('reference: ', fama_reference)
         ws_client = Workspace(self.ws_url)
-        annotation_obj_ref, feature_ids = save_domain_annotations(project=fama_output['project'],
-                                         reference_id=fama_reference,
-                                         ws_name=params['workspace_name'],
-                                         ws_client=ws_client,
-                                         name=params['output_annotation_name'],
-                                         genome_ref=params['genome_ref'])
-
-        # Create feature set with fama_output['feature_ids']
-        #feature_ids = fama_output['feature_ids']
-        elements = {feature_id: [input_genome_ref] for feature_id in feature_ids}
-        feature_set_data = {'description': 'Generated FeatureSet from Fama protein profiling',
-                            'element_ordering': feature_ids,
-                            'elements': elements}
+        # Run Fama
+        fama_params = {'input_proteins': input_proteins,
+                       'work_dir': self.shared_folder,
+                       'reference': fama_reference,
+                       'ws_name': params['workspace_name'],
+                       'ws_client': ws_client,
+                       'featureset_name': params['output_feature_set_name'],
+                       'annotation_prefix': params['output_annotation_name']
+                       }
+        fama_output = protein_functional_profiling_pipeline(fama_params)
+        objects_created = fama_output['objects_created']
 
         dfu = DataFileUtil(self.callback_url)
         workspace_id = dfu.ws_name_to_id(params['workspace_name'])
@@ -227,7 +220,7 @@ class FamaProfiling:
         save_object_params = {
             'id': workspace_id,
             'objects': [{'type': object_type,
-                         'data': feature_set_data,
+                         'data': fama_output['feature_set_data'],
                          'name': params['output_feature_set_name']}]}
 
         try:
@@ -238,6 +231,8 @@ class FamaProfiling:
             self.log(str(dfue))
             raise
         feature_set_obj_ref = "{}/{}/{}".format(dfu_oi[6], dfu_oi[0], dfu_oi[4])
+        objects_created.append({'ref': feature_set_obj_ref, 'description': 'Filtered genome features'})
+
         self.log('FeatureSet saved to ' + feature_set_obj_ref)
         
         # Write HTML output to workspace
@@ -276,10 +271,7 @@ class FamaProfiling:
 
         # Save report
         report_params = {'message': message,
-                         'objects_created':[
-                            {'ref': feature_set_obj_ref, 'description': 'Filtered genome features'},
-                            {'ref': annotation_obj_ref, 'description': 'Functional annotations'}
-                         ],
+                         'objects_created':objects_created,
                          'direct_html_link_index': 0,
                          'html_links': html_links,
                          'file_links': fama_output['report_files'],

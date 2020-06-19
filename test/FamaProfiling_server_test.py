@@ -70,7 +70,7 @@ class FamaProfilingTest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    @unittest.skip("")
+    #@unittest.skip("")
     def test_pe_fama_profiling(self):
 
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
@@ -83,7 +83,7 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         
-    @unittest.skip("")
+    #@unittest.skip("")
     def test_se_fama_profiling(self):
         ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
                                                                     'ref_dataset': 'nitrogen',
@@ -93,71 +93,14 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         
         
+    #@unittest.skip("")
     def test_protein_fama_profiling(self):
         ret = self.getImpl().run_FamaProteinProfiling(self.getContext(), {'workspace_name': self.getWsName(),
                                                                     'ref_dataset': 'nitrogen',
-                                                                    'genome_ref': '22763/32/1',  # S. oneidensis genome
-                                                                    'output_annotation_name': 'Fama_protein_test_output_annotation',
+                                                                    'genome_ref': ['22763/32/1', '41747/12/1'],  # S. oneidensis genome
+                                                                    'output_annotation_name': 'Fama_Ncycle.',
                                                                     'output_feature_set_name': 'Fama_protein_test_output_featureset'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         
 
-    @unittest.skip("")
-    def test_create_dms(self):
-        ret = self.create_dms('/data/famaprofiling/1.4/fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv', 'nitrogen', '10.0', '22763')
-        
-        print ('Object reference', ret)
-
-
-    def create_dms(self, ref_path, ref_name, ref_version, ws_name):
-        domain_source = 'Fama'
-        date = '2020-06-12'
-        program_version = '1.0'
-        model_type = 'Protein-Sequence'
-        
-        # make domain models
-        models = {}
-        acc2descr = {}
-        with open(ref_path, 'r') as infile:
-            for line in infile:
-                row = line.rstrip('\n\r').split('\t')
-                model = {'accession': row[0],
-                    'name': row[0],
-                    'description': row[1],
-                    'length': 0,
-                    'model_type': model_type
-                    }
-                models[row[0]] = model
-                acc2descr[row[0]] = row[1]
-        # make domain library
-        dlib = {'id': '',
-            'source': 'Fama',
-            'source_url': 'https://iseq.lbl.gov',
-            'version': ref_version,
-            'release_date': date,
-            'program': program_version,
-            'domain_prefix': '',
-            'dbxref_prefix': '',
-            'library_files': [],
-            'domains': models
-            }
-        ret = self.getWsClient().save_objects({'id': ws_name, #'workspace': #self.getWsName(),
-                                         'objects': [{'name': domain_source + '_' + ref_name + '_v.' + ref_version + '_functions',
-                                                     'type': u'KBaseGeneFamilies.DomainLibrary',
-                                                     'data': dlib}]})
-        print(str(ret))
-        dlib_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
-        # make domain model set
-        dms = {'set_name': domain_source + '_' + ref_name + '_v.' + ref_version,
-            'domain_libs': {'': dlib_id},
-            'domain_prefix_to_dbxref_url': {'':'https://iseq.lbl.gov'},
-            'domain_accession_to_description': acc2descr
-            }
-        ret = self.getWsClient().save_objects({'id': ws_name, #'workspace': #self.getWsName(),
-                                         'objects': [{'name': domain_source + '_' + ref_name + '_v.' + ref_version + '_function_set',
-                                                     'type': u'KBaseGeneFamilies.DomainModelSet',
-                                                     'data': dms}]})
-        print(str(ret))
-        dms_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
-        return dms_id

@@ -4,7 +4,7 @@
         "kazakov"
     ],
     "contact": "",
-    "categories": ["active","communities"],
+    "categories": ["active","sequence"],
     "widgets": {
         "input": null,
         "output": "no-display"
@@ -14,7 +14,7 @@
             "id": "genome_ref",
             "optional": false,
             "advanced": false,
-            "allow_multiple": false,
+            "allow_multiple": true,
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
@@ -68,7 +68,7 @@
             "optional" : false,
             "advanced" : false,
             "allow_multiple" : false,
-            "default_values" : [ "Fama.functional.annotations" ],
+            "default_values" : [ "Fama.annotations." ],
             "field_type" : "text",
             "text_options" : {
                 "valid_ws_types" : [],

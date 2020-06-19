@@ -7,55 +7,59 @@ from fama.taxonomy.taxonomy_profile import TaxonomyProfile
 from fama.output.report import get_function_scores, get_function_taxonomy_scores
 
 
-def compose_run_info(project):
-    result = []
-    sample_id = project.list_samples()[0]
-    if project.samples[sample_id].is_paired_end:
-        result.append('<p>Total number of forward reads: ' +
-                      str(project.options.get_fastq1_readcount(sample_id)) +
-                      '</p>')
-        result.append('<p>Total number of reverse reads: ' +
-                      str(project.options.get_fastq2_readcount(sample_id)) +
-                      '</p>')
-    else:
-        result.append('<p>Total number of input sequences: ' +
-                      str(project.options.get_fastq1_readcount(sample_id)) +
-                      '</p>')
+def compose_run_info(project, sample_labels, tab_index):
+    result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     result.append('<p>Reference data set: ' +
-                  project.options.get_collection(sample_id) +
+                  project.options.get_collection() +
                   '</p>')
-    if project.samples[sample_id].is_paired_end:
-        result.append('<p>Number of mapped reads, forward: ' +
-                      str(len(project.samples[sample_id].reads['pe1'])) +
-                      '</p>')
-        result.append('<p>Number of mapped reads, reverse: ' +
-                      str(len(project.samples[sample_id].reads['pe2'])) +
-                      '</p>')
-    else:
-        result.append('<p>Number of mapped sequences: ' +
-                      str(len(project.samples[sample_id].reads['pe1'])) +
-                      '</p>')
-    if project.samples[sample_id].is_paired_end:
-        result.append('<p>Predicted average insert size: ' +
-                      '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
-                      '</p>')
-        if (project.samples[sample_id].rpkg_scaling_factor == 0.0 or
-                project.samples[sample_id].rpkg_scaling_factor is None):
-            result.append('<p>Average genome size was not calculated.</p>')
+    for sample_id in project.list_samples():
+        if sample_id in sample_labels:
+            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' + project.samples[sample_id].sample_name + '">' + sample_labels[sample_id] + '</a></h4>')
         else:
-            result.append('<p>Predicted average genome size: ' +
-                          '{0:.0f}'.format(
-                                            project.options.get_fastq1_basecount(sample_id) *
-                                            project.samples[sample_id].rpkg_scaling_factor
-                                            ) +
+            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' + project.samples[sample_id].sample_name + '">' + project.samples[sample_id].sample_name + '</a></h4>')
+            
+        if project.samples[sample_id].is_paired_end:
+            result.append('<p>Total number of forward reads: ' +
+                          str(project.options.get_fastq1_readcount(sample_id)) +
                           '</p>')
-
+            result.append('<p>Total number of reverse reads: ' +
+                          str(project.options.get_fastq2_readcount(sample_id)) +
+                          '</p>')
+        else:
+            result.append('<p>Total number of input sequences: ' +
+                          str(project.options.get_fastq1_readcount(sample_id)) +
+                          '</p>')
+        if project.samples[sample_id].is_paired_end:
+            result.append('<p>Number of mapped reads, forward: ' +
+                          str(len(project.samples[sample_id].reads['pe1'])) +
+                          '</p>')
+            result.append('<p>Number of mapped reads, reverse: ' +
+                          str(len(project.samples[sample_id].reads['pe2'])) +
+                          '</p>')
+        else:
+            result.append('<p>Number of mapped sequences: ' +
+                          str(len(project.samples[sample_id].reads['pe1'])) +
+                          '</p>')
+        if project.samples[sample_id].is_paired_end:
+            result.append('<p>Predicted average insert size: ' +
+                          '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
+                          '</p>')
+            if (project.samples[sample_id].rpkg_scaling_factor == 0.0 or
+                    project.samples[sample_id].rpkg_scaling_factor is None):
+                result.append('<p>Average genome size was not calculated.</p>')
+            else:
+                result.append('<p>Predicted average genome size: ' +
+                              '{0:.0f}'.format(
+                                                project.options.get_fastq1_basecount(sample_id) *
+                                                project.samples[sample_id].rpkg_scaling_factor
+                                                ) +
+                              '</p>')
+    result.append('</div>')
     return '\n'.join(result)
 
 
-def compose_functional_profile(project):
-    result = []
-    sample_id = project.list_samples()[0]
+def compose_functional_profile(project, sample_id, tab_index):
+    result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     metric = None
     if project.samples[sample_id].is_paired_end:
         if (project.samples[sample_id].rpkg_scaling_factor != 0.0 and
@@ -87,7 +91,7 @@ def compose_functional_profile(project):
     for function in sorted(scores.keys()):
         if sample_id in scores[function]:
             result.append('<tr><td>' + function + '</td>')
-            if metric in ('readcount', 'fragmentcount'):
+            if metric == 'readcount' or metric == 'fragmentcount':
                 result.append('<td>' + str(int(scores[function][sample_id][metric])) + '</td>')
             else:
                 result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) + '</td>')
@@ -101,12 +105,12 @@ def compose_functional_profile(project):
             result.append('<td>' + project.ref_data.lookup_function_name(function)
                           + '</td></tr>')
     result.append('</table>')
+    result.append('</div>')
     return '\n'.join(result)
 
 
-def compose_function_groups(project):
-    result = []
-    sample_id = project.list_samples()[0]
+def compose_function_groups(project, sample_id, tab_index):
+    result = ['<div id="tab' + tab_index + '" class="tabcontent">']
     metric = None
     if project.samples[sample_id].is_paired_end:
         if (project.samples[sample_id].rpkg_scaling_factor != 0.0 and
@@ -150,7 +154,7 @@ def compose_function_groups(project):
                 category_data[sample]['hit_count'] += scores[function][sample]['hit_count']
 
         result.append('<tr><td>' + category + '</td>')
-        if metric in ('readcount', 'fragmentcount'):
+        if metric == 'readcount' or metric == 'fragmentcount':
             result.append('<td>' + str(int(category_data[sample_id][metric])) + '</td>')
         else:
             result.append('<td>' + '{0:.5f}'.format(category_data[sample_id][metric]) + '</td>')
@@ -161,11 +165,11 @@ def compose_function_groups(project):
             ) + '</td></tr>')
 
     result.append('</table>')
+    result.append('</div>')
     return '\n'.join(result)
 
 
-def compose_taxonomy_profile(project):
-    sample_id = project.list_samples()[0]
+def compose_taxonomy_profile(project, sample_id, tab_index):
     metric = None
     if project.samples[sample_id].is_paired_end:
         if (project.samples[sample_id].rpkg_scaling_factor != 0.0 and
@@ -198,91 +202,128 @@ def compose_taxonomy_profile(project):
     tax_profile.make_function_taxonomy_profile(project.taxonomy_data, sample_scores)
     taxonomy_df = tax_profile.convert_profile_into_score_df(metric=metric)
     taxonomy_df.replace(0.0, np.nan, inplace=True)
-    return taxonomy_df.to_html(na_rep="")  # , float_format=lambda x: '%.2f' % x)
+    result = '<div id="tab' + tab_index + '" class="tabcontent">\n'
+    result += taxonomy_df.to_html(na_rep="")
+    result += '\n</div>\n'
+    return result #taxonomy_df.to_html(na_rep="")  # , float_format=lambda x: '%.2f' % x)
 
 
-def compose_protein_list(project):
-    result = []
-    sample_id = project.list_samples()[0]
-    if 'pe1' in project.samples[sample_id].reads:
-        result.append('<table><thead><tr>')
-        result.append('<th>Protein</th>')
-        result.append('<th>Function</th>')
-        result.append('<th>Description</th>')
-        result.append('<th>Amino acid identity %</th>')
-        result.append('<th>Taxonomy</th>')
-        result.append('</thead></tr>')
+def compose_protein_list(project, sample_labels, tab_index):
+    result = ['<div id="tab' + tab_index + '" class="tabcontent">']
+    result.append('<table><thead><tr>')
+    result.append('<th>Input object</th>')
+    result.append('<th>Protein</th>')
+    result.append('<th>Function</th>')
+    result.append('<th>Description</th>')
+    result.append('<th>Amino acid identity %</th>')
+    result.append('<th>Taxonomy</th>')
+    result.append('</thead></tr>')
 
-        for protein_id in sorted(project.samples[sample_id].reads['pe1'].keys()):
-            protein = project.samples[sample_id].reads['pe1'][protein_id]
-            if protein.status == 'function':
-                result.append('<tr><td>' + protein_id + '</td>')
-                fama_identity = sum(
-                    [x.identity for x in protein.hit_list.hits]
-                    ) / len(protein.hit_list.hits)
-                function = ','.join(sorted(protein.functions.keys()))
-                result.append('<td>' + function + '</td>')
-                description = '|'.join(
-                    sorted([
-                        project.ref_data.lookup_function_name(f) for f
-                        in protein.functions.keys()
-                        ])
-                    )
-                result.append('<td>' + description + '</td>')
-                result.append('<td>' + '{0:.1f}'.format(fama_identity) + '</td>')
-                result.append('<td>' + project.taxonomy_data.data[protein.taxonomy]['name'] +
-                              '</td></tr>')
-        result.append('</table>')
+    for sample_id in project.list_samples():
+    #sample_id = project.list_samples()[0]
+        if 'pe1' in project.samples[sample_id].reads:
+
+            for protein_id in sorted(project.samples[sample_id].reads['pe1'].keys()):
+                protein = project.samples[sample_id].reads['pe1'][protein_id]
+                if protein.status == 'function':
+                    result.append('<tr><td>' + sample_labels[sample_id] + '</td>')
+                    result.append('<td>' + protein_id + '</td>')
+                    fama_identity = sum(
+                        [x.identity for x in protein.hit_list.hits]
+                        ) / len(protein.hit_list.hits)
+                    function = ','.join(sorted(protein.functions.keys()))
+                    result.append('<td>' + function + '</td>')
+                    description = '|'.join(
+                        sorted([
+                            project.ref_data.lookup_function_name(f) for f
+                            in protein.functions.keys()
+                            ])
+                        )
+                    result.append('<td>' + description + '</td>')
+                    result.append('<td>' + '{0:.1f}'.format(fama_identity) + '</td>')
+                    result.append('<td>' + project.taxonomy_data.data[protein.taxonomy]['name'] +
+                                  '</td></tr>')
+    result.append('</table>')
+    result.append('</div>')
     return '\n'.join(result)
 
 
-def generate_html_report(outfile, project):
+def generate_html_report(outfile, project, sample_labels):
     """ Generates HTML report """
     html_template = os.path.join(os.path.dirname(__file__), 'kbase_report.template')
+    report_tabs = []
     with open(outfile, 'w') as of:
         with open(html_template, 'r') as infile:
             for line in infile:
                 line = line.rstrip('\n\r')
-                if line == '<\RunInfo>':
-                    of.write(compose_run_info(project))
-                elif line == '<\FunctionalProfile>':
-                    of.write(compose_functional_profile(project))
-                elif line == '<\FunctionGroups>':
-                    of.write(compose_function_groups(project))
-                elif line == '<\TaxonomyProfile>':
-                    taxonomy_profile = compose_taxonomy_profile(project)
-                    if taxonomy_profile:
-                        of.write(taxonomy_profile)
-                    else:
-                        of.write('<p>No taxonomy data</p>/n')
+                if line == '<\InsertButtons>':
+                    tab_counter = 1
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
+                    report_tabs.append(compose_run_info(project, sample_labels, str(tab_counter)))
+                    for sample_id in project.list_samples():
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Functional profile</button>')
+                        report_tabs.append(compose_functional_profile(project, sample_id, str(tab_counter)))
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Functional groups</button>')
+                        report_tabs.append(compose_function_groups(project, sample_id, str(tab_counter)))
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Taxonomy profile</button>')
+                        report_tabs.append(compose_taxonomy_profile(project, sample_id, str(tab_counter)))
+                elif line == '<\InsertTabs>':
+                    of.write('\n'.join(report_tabs))
                 else:
                     of.write(line + '\n')
 
 
-def generate_protein_html_report(outfile, project):
+def generate_protein_html_report(outfile, project, sample_labels):
     """ Generates HTML report for protein project """
     html_template = os.path.join(os.path.dirname(__file__), 'kbase_protein_report.template')
+    report_tabs = []
     with open(outfile, 'w') as of:
         with open(html_template, 'r') as infile:
             for line in infile:
                 line = line.rstrip('\n\r')
-                if line == '<\RunInfo>':
-                    of.write(compose_run_info(project))
-                elif line == '<\FunctionalProfile>':
-                    of.write(compose_functional_profile(project))
-                elif line == '<\FunctionGroups>':
-                    of.write(compose_function_groups(project))
-                elif line == '<\TaxonomyProfile>':
-                    taxonomy_profile = compose_taxonomy_profile(project)
-                    if taxonomy_profile:
-                        of.write(taxonomy_profile)
-                    else:
-                        of.write('<p>No taxonomy data</p>/n')
-                elif line == '<\ProteinList>':
-                    protein_list = compose_protein_list(project)
-                    if protein_list:
-                        of.write(protein_list)
-                    else:
-                        of.write('<p>No proteins mapped</p>/n')
+                if line == '<\InsertButtons>':
+                    tab_counter = 1
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
+                    report_tabs.append(compose_run_info(project, sample_labels, str(tab_counter)))
+                    tab_counter += 1
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Protein list</button>')
+                    report_tabs.append(compose_protein_list(project, sample_labels, str(tab_counter)))
+
+                    for sample_id in project.list_samples():
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Functional profile</button>')
+                        report_tabs.append(compose_functional_profile(project, sample_id, str(tab_counter)))
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Functional groups</button>')
+                        report_tabs.append(compose_function_groups(project, sample_id, str(tab_counter)))
+                        tab_counter += 1
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Taxonomy profile</button>')
+                        report_tabs.append(compose_taxonomy_profile(project, sample_id, str(tab_counter)))
+                elif line == '<\InsertTabs>':
+                    of.write('\n'.join(report_tabs))
                 else:
                     of.write(line + '\n')
+
+                #~ if line == '<\RunInfo>':
+                    #~ of.write(compose_run_info(project))
+                #~ elif line == '<\FunctionalProfile>':
+                    #~ of.write(compose_functional_profile(project))
+                #~ elif line == '<\FunctionGroups>':
+                    #~ of.write(compose_function_groups(project))
+                #~ elif line == '<\TaxonomyProfile>':
+                    #~ taxonomy_profile = compose_taxonomy_profile(project)
+                    #~ if taxonomy_profile:
+                        #~ of.write(taxonomy_profile)
+                    #~ else:
+                        #~ of.write('<p>No taxonomy data</p>/n')
+                #~ elif line == '<\ProteinList>':
+                    #~ protein_list = compose_protein_list(project)
+                    #~ if protein_list:
+                        #~ of.write(protein_list)
+                    #~ else:
+                        #~ of.write('<p>No proteins mapped</p>/n')
+                #~ else:
+                    #~ of.write(line + '\n')
