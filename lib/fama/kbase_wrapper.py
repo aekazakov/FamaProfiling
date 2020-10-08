@@ -4,6 +4,8 @@ import os
 import shutil
 import uuid
 import zipfile
+from installed_clients.baseclient import ServerError
+
 from fama.utils.const import ENDS, STATUS_GOOD
 from fama.utils.utils import sanitize_file_name
 from fama.project.project import Project
@@ -15,9 +17,8 @@ from fama.kbase_report import generate_html_report, generate_protein_html_report
 # How can I get reference data path from the server?
 refdata_dir = '/data/famaprofiling/1.4/'
 ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
-    'universal': 'Fama_universal_v.1.4_function_set',
-    'rpl6': 'Fama_rpl6_v.1.2_function_set'
-    }
+                       'universal': 'Fama_universal_v.1.4_function_set',
+                       'rpl6': 'Fama_rpl6_v.1.2_function_set'}
 
 
 def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset, input_ref):
@@ -58,7 +59,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset,
 
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_html_report(out_report, project, {}) #TODO: add object names
+    generate_html_report(out_report, project, {})  # TODO: add object names
     with zipfile.ZipFile(out_report + '.zip', 'w',
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
@@ -151,13 +152,10 @@ def protein_functional_profiling_pipeline(params):
     # export_reads
     output = {}
     output['krona_charts'] = {}
-    #sample_id = project.list_samples()[0]
+
     # Generate output
-
-
     report_files = {}
-    metric = 'readcount'
-
+    metric = 'proteincount'
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         project.options.project_name + '_' + metric + '_functions_taxonomy.xlsx'
@@ -180,16 +178,21 @@ def protein_functional_profiling_pipeline(params):
     objects_created = []
     genome_names = {}
     # Get Domain Model Set reference
-    dms_ref = get_dms(params['reference'], 
+    dms_ref = get_dms(params['reference'],
                       project.config.get_functions_file(project.collection),
                       params['ws_name'],
                       params['ws_client']
                       )
 
     for sample_id in project.list_samples():
-        annotation_obj_ref, feature_ids, genome_name = save_domain_annotations(project, dms_ref, params['ws_name'], params['ws_client'], params['annotation_prefix'], sample_id)
+        annotation_obj_ref, feature_ids, genome_name = \
+            save_domain_annotations(project, dms_ref, params['ws_name'],
+                                    params['ws_client'], params['annotation_prefix'],
+                                    sample_id)
         genome_names[sample_id] = genome_name
-        objects_created.append({'ref': annotation_obj_ref, 'description': 'Functional annotations for genome ' + project.samples[sample_id].sample_name})
+        objects_created.append({'ref': annotation_obj_ref,
+                                'description': 'Functional annotations for genome '
+                                + project.samples[sample_id].sample_name})
         for feature_id in feature_ids:
             if feature_id not in featureset_elements:
                 featureset_elements[feature_id] = []
@@ -201,7 +204,8 @@ def protein_functional_profiling_pipeline(params):
             sample_id + '_' + metric + '_functions_taxonomy.xlsx'
             ))
         if os.path.exists(sample_xlsx_report):
-            report_files[sample_xlsx_report] = sanitize_file_name(genome_name + '_function_taxonomy_profile_full.xlsx')
+            report_files[sample_xlsx_report] = \
+                sanitize_file_name(genome_name + '_function_taxonomy_profile_full.xlsx')
         else:
             print('Sample XLSX file not found:', sample_xlsx_report)
         krona_file = sanitize_file_name(os.path.join(
@@ -210,17 +214,22 @@ def protein_functional_profiling_pipeline(params):
             ))
 
         if os.path.exists(krona_file):
-            krona_output = sanitize_file_name(os.path.join(out_dir, genome_name + '_function_taxonomy_profile_chart.html'))
+            krona_output = \
+                sanitize_file_name(os.path.join(out_dir, genome_name +
+                                   '_function_taxonomy_profile_chart.html'))
             shutil.copy2(krona_file, krona_output)
             with zipfile.ZipFile(krona_output + '.zip', 'w',
                                  zipfile.ZIP_DEFLATED,
                                  allowZip64=True) as zip_file:
-                zip_file.write(krona_output, sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html'))
-            report_files[krona_output] = sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
-            output['krona_charts'][krona_output + '.zip'] = sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
+                zip_file.write(krona_output,
+                               sanitize_file_name(genome_name +
+                                                  '_function_taxonomy_profile_chart.html'))
+            report_files[krona_output] = \
+                sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
+            output['krona_charts'][krona_output + '.zip'] = \
+                sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
         else:
             print('Krona diagram file not found:', krona_file)
-        
 
     feature_set_data = {'description': 'FeatureSet generated by Fama protein profiling',
                         'element_ordering': featureset_element_ordering,
@@ -234,7 +243,7 @@ def protein_functional_profiling_pipeline(params):
         zip_file.write(out_report, 'fama_report.html')
     output['html_report'] = out_report + '.zip'
     report_files[out_report] = 'fama_report.html'
-        
+
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
     with zipfile.ZipFile(result_file, 'w',
@@ -326,7 +335,8 @@ def write_project_file(input_paths, ref_dataset, work_dir):
                   'work_dir = '))
         of.write(work_dir)
         for sample_id in input_paths:
-            of.write('\n\n[' + sanitize_sample_id(sample_id) + ']\nsample_id = ' + sample_id + '\nfastq_pe1 = ')
+            of.write('\n\n[' + sanitize_sample_id(sample_id) + ']\nsample_id = ' +
+                     sample_id + '\nfastq_pe1 = ')
             of.write(input_paths[sample_id]['fwd_path'])
             if 'rev_path' in input_paths[sample_id]:
                 of.write('\nfastq_pe2 = ')
@@ -383,7 +393,7 @@ def create_dms(ref_path, ref_name, ref_version, ws_name, ws_client):
     date = '2020-06-12'
     program_version = '1.0'
     model_type = 'Protein-Sequence'
-    
+
     # make domain models
     models = {}
     acc2descr = {}
@@ -391,41 +401,44 @@ def create_dms(ref_path, ref_name, ref_version, ws_name, ws_client):
         for line in infile:
             row = line.rstrip('\n\r').split('\t')
             model = {'accession': row[0],
-                'name': row[0],
-                'description': row[1],
-                'length': 0,
-                'model_type': model_type
-                }
+                     'name': row[0],
+                     'description': row[1],
+                     'length': 0,
+                     'model_type': model_type
+                     }
             models[row[0]] = model
             acc2descr[row[0]] = row[1]
     # make domain library
     dlib = {'id': '',
-        'source': 'Fama',
-        'source_url': 'https://iseq.lbl.gov/fama/reference/' + ref_name + '/',
-        'version': ref_version,
-        'release_date': date,
-        'program': program_version,
-        'domain_prefix': '',
-        'dbxref_prefix': '',
-        'library_files': [],
-        'domains': models
-        }
+            'source': 'Fama',
+            'source_url': 'https://iseq.lbl.gov/fama/reference/' + ref_name + '/',
+            'version': ref_version,
+            'release_date': date,
+            'program': program_version,
+            'domain_prefix': '',
+            'dbxref_prefix': '',
+            'library_files': [],
+            'domains': models
+            }
     ret = ws_client.save_objects({'workspace': ws_name,
-                                     'objects': [{'name': domain_source + '_' + ref_name + '_v.' + ref_version + '_functions',
-                                                 'type': 'KBaseGeneFamilies.DomainLibrary',
-                                                 'data': dlib}]})
+                                  'objects': [{'name': domain_source + '_' + ref_name +
+                                               '_v.' + ref_version + '_functions',
+                                               'type': 'KBaseGeneFamilies.DomainLibrary',
+                                               'data': dlib}]})
     print(str(ret))
     dlib_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
     # make domain model set
     dms = {'set_name': domain_source + '_' + ref_name + '_v.' + ref_version,
-        'domain_libs': {'': dlib_id},
-        'domain_prefix_to_dbxref_url': {'':'https://iseq.lbl.gov'},
-        'domain_accession_to_description': acc2descr
-        }
+           'domain_libs': {'': dlib_id},
+           'domain_prefix_to_dbxref_url': {'': 'https://iseq.lbl.gov/fama/reference/' +
+                                           ref_name + '/'},
+           'domain_accession_to_description': acc2descr
+           }
     ret = ws_client.save_objects({'workspace': ws_name,
-                                     'objects': [{'name': domain_source + '_' + ref_name + '_v.' + ref_version + '_function_set',
-                                                 'type': 'KBaseGeneFamilies.DomainModelSet',
-                                                 'data': dms}]})
+                                  'objects': [{'name': domain_source + '_' + ref_name + '_v.' +
+                                               ref_version + '_function_set',
+                                               'type': 'KBaseGeneFamilies.DomainModelSet',
+                                               'data': dms}]})
     print(str(ret))
     dms_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
     return dms_id
@@ -447,33 +460,29 @@ def get_dms(reference_id, ref_path, ws_name, ws_client):
         print(str(wse))
 
     if dms_ref is None:
-        dms_ref = create_dms(ref_path, reference_id, ref_model_set_names[reference_id].split('_')[-3], ws_name, ws_client)
+        dms_ref = create_dms(ref_path,
+                             reference_id,
+                             ref_model_set_names[reference_id].split('_')[-3],
+                             ws_name,
+                             ws_client)
     return dms_ref
 
 
 def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, sample_id):
 
-    #~ ref_path = project.config.get_functions_file(project.collection)
-    #~ dms_ref = get_dms(reference_id, ref_path, ws_name, ws_client)
-
-    
-    ret = ws_client.get_objects2({'objects':[{'ref': project.samples[sample_id].sample_name}]})
+    ret = ws_client.get_objects2({'objects': [{'ref': project.samples[sample_id].sample_name}]})
     genome = ret['data'][0]['data']
     genome_name = ret['data'][0]['info'][1]
-    
     annotated_features = set()
     for read_id, read in project.samples[sample_id].reads['pe1'].items():
         if read.status == STATUS_GOOD:
             annotated_features.add(read_id)
-    
     data = {}
     contig_to_size_and_feature_count = {}
     feature_to_contig_and_index = {}
     feature_count = 0
     max_start = 0
     prev_contig = None
-    #contig2length = {x[0]:x[1] for x in zip(genome['contig_ids'], genome['contig_lengths'])}
-    
     feature_ids = []
     for feature_index, feature in enumerate(genome['features']):
         feature_location = feature['location'][0]
@@ -501,7 +510,6 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
                     if alias in annotated_features:
                         identifier = alias
                         break
-        
         if identifier is None:
             continue
         feature_ids.append(identifier)
@@ -518,7 +526,11 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
         for hit in gene.hit_list.hits:
             for hit_function in hit.functions:
                 if hit_function in gene_functions and hit_function not in feature_mappings:
-                    feature_mappings[hit_function] = [(hit.q_start, hit.q_end, hit.evalue, hit.bitscore, hit.length/len(gene.sequence))]
+                    feature_mappings[hit_function] = [(hit.q_start,
+                                                       hit.q_end,
+                                                       hit.evalue,
+                                                       hit.bitscore,
+                                                       hit.length/len(gene.sequence))]
         annotation_element = (identifier, start, end, strand, feature_mappings)
         if contig not in data:
             data[contig] = []
@@ -532,11 +544,11 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
                       'contig_to_size_and_feature_count': contig_to_size_and_feature_count,
                       'feature_to_contig_and_index': feature_to_contig_and_index
                       }
-    
+
     ret = ws_client.save_objects({'workspace': ws_name,
-                                     'objects': [{'name': name_prefix + genome_name,
-                                                 'type': u'KBaseGeneFamilies.DomainAnnotation',
-                                                 'data': annotation_obj}]})
+                                  'objects': [{'name': name_prefix + genome_name,
+                                               'type': u'KBaseGeneFamilies.DomainAnnotation',
+                                               'data': annotation_obj}]})
     print(ret)
     result = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
     return result, feature_ids, genome_name

@@ -365,7 +365,7 @@ def get_function_scores(project, sample_id=None, metric=None):
         sample_id (str, optional): sample identifier
         metric (str, optional): acceptable values are 'readcount', 'erpk',
             'fragmentcount', 'fpk', 'efpk', 'fpkm', 'erpkm', 'efpkm',
-            'fpkg', 'erpkg', 'efpkg'
+            'fpkg', 'erpkg', 'efpkg', 'proteincount'
 
     Returns:
         three-level dictionary (defaultdict[str, defaultdict[str,defaultdict[str,float]]]):
@@ -408,7 +408,7 @@ def get_function_scores(project, sample_id=None, metric=None):
                 raise KeyError('No reads data loaded for sample', sample, 'end pe2')
 
         norm_factor = 0.0
-        if metric in ['readcount', 'erpk', 'fragmentcount', 'fpk', 'efpk']:
+        if metric in ['readcount', 'erpk', 'fragmentcount', 'fpk', 'efpk', 'proteincount']:
             norm_factor = 1.0
         elif metric in ['fpkm', 'erpkm', 'efpkm']:
             norm_factor = project.samples[sample].rpkm_scaling_factor
@@ -418,16 +418,10 @@ def get_function_scores(project, sample_id=None, metric=None):
             raise ValueError('Unknown metric:' + metric)
 
         if norm_factor == 0.0:
-            print('Cannot get normalization factor for metric', metric, 'in sample', sample)
-            print('Fall back to raw counts.')
-            norm_factor = 1.0
-            if project.samples[sample].is_paired_end:
-                metric = 'fragmentcount'
-            else:
-                metric = 'readcount'
+            raise ValueError('Cannot get normalization factor')
 
         # Calculate scores
-        if metric in ['readcount', 'erpk', 'erpkg', 'erpkm']:
+        if metric in ['readcount', 'erpk', 'erpkg', 'erpkm', 'proteincount']:
             if project.samples[sample].is_paired_end:
                 raise ValueError('No read count, RPKG and RPKM metric for paired-end input')
 
@@ -435,7 +429,7 @@ def get_function_scores(project, sample_id=None, metric=None):
                 if read.status != STATUS_GOOD:  # Skip bad reads
                     continue
                 for function in read.functions:
-                    if metric == 'readcount':
+                    if metric == 'readcount' or metric == 'proteincount':
                         ret_val[function][sample]['count'] += 1.0
                         ret_val[function][sample][metric] += 1.0
                     else:
@@ -704,7 +698,7 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
         sample_id (str, optional): sample identifier
         metric (str, optional): acceptable values are 'readcount', 'erpk', 'rpkm',
             'fragmentcount', 'fpk', 'efpk', 'fpkm', 'erpkm', 'efpkm',
-            'fpkg', 'rpkg', 'erpkg', 'efpkg'
+            'fpkg', 'rpkg', 'erpkg', 'efpkg', 'proteincount'
 
     Returns:
         ret_val (defaultdict[str, defaultdict[str, defaultdict[str,defaultdict[str,float]]]]):
@@ -739,7 +733,7 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
                 raise ValueError('No reads data loaded for sample' + sample + 'end pe2')
 
         norm_factor = 0.0
-        if metric in ['readcount', 'erpk', 'fragmentcount', 'fpk', 'efpk']:
+        if metric in ['readcount', 'erpk', 'fragmentcount', 'fpk', 'efpk', 'proteincount']:
             norm_factor = 1.0
         elif metric in ['rpkm', 'fpkm', 'erpkm', 'efpkm']:
             norm_factor = project.samples[sample].rpkm_scaling_factor
@@ -747,16 +741,10 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
             norm_factor = project.samples[sample].rpkg_scaling_factor
 
         if norm_factor == 0.0:
-            print('Cannot get normalization factor for metric', metric, 'in sample', sample)
-            print('Fall back to raw counts.')
-            norm_factor = 1.0
-            if project.samples[sample].is_paired_end:
-                metric = 'fragmentcount'
-            else:
-                metric = 'readcount'
+            raise ValueError('Cannot get normalization factor')
 
         # Calculate scores
-        if metric in ['readcount', 'rpkg', 'rpkm', 'erpk', 'erpkg', 'erpkm']:
+        if metric in ['readcount', 'rpkg', 'rpkm', 'erpk', 'erpkg', 'erpkm', 'proteincount']:
             if project.samples[sample].is_paired_end:
                 raise ValueError('No Read count, RPKG and RPKM metrics for paired-end input')
 
@@ -766,7 +754,7 @@ def get_function_taxonomy_scores(project, sample_id=None, metric=None):
                 read_erpk_scores = read.functions
                 for function in read_erpk_scores:
                     ret_val[read.taxonomy][function][sample]['count'] += 1.0
-                    if metric == 'readcount':
+                    if metric == 'readcount' or metric == 'proteincount':
                         ret_val[read.taxonomy][function][sample][metric] += 1
                     else:
                         ret_val[read.taxonomy][function][sample][
@@ -1118,7 +1106,7 @@ def generate_sample_report(project, sample_id, metric=None):
         )
 
 
-def generate_protein_sample_report(project, sample_id, metric=None):
+def generate_protein_sample_report(project, sample_id, metric='proteincount'):
     """ Creates report files for a protein sample in project's directory.
     Output files include report in text format, tables in XLSX format, Krona charts.
 
@@ -1126,7 +1114,7 @@ def generate_protein_sample_report(project, sample_id, metric=None):
         project (:obj:'Project'): Project object that stores all annotated reads
         sample_id (str, optional): sample identifier
         metric (str, optional): scoring metric. Acceptable values are
-            'readcount', 'erpk', 'rpkm',
+            'readcount', 'erpk', 'rpkm', 'proteincount',
             'fragmentcount', 'fpk', 'efpk', 'fpkm', 'erpkm', 'efpkm',
             'fpkg', 'rpkg', 'erpkg', 'efpkg'
     """
@@ -1298,7 +1286,7 @@ def generate_protein_project_report(project):
                             str(hit)
                             ]) + '\n'
                         )
-    metric = 'readcount'
+    metric = 'proteincount'
     scores = get_function_scores(project, sample_id=None, metric=metric)
     make_function_sample_xlsx(project, scores, metric=metric)
     scores_function_taxonomy = get_function_taxonomy_scores(
@@ -1756,19 +1744,11 @@ def generate_sample_text_report(project, sample_id, metric=None):
     if project.samples[sample_id].rpkg_scaling_factor == 0.0 and (
             metric in ['efpkg', 'fpkg', 'erpkg', 'rpkg']
     ):
-        print('Not enough data to normalize by average genome size. Fall back to raw counts.')
-        if project.samples[sample_id].is_paired_end:
-            metric = 'fragmentcount'
-        else:
-            metric = 'readcount'
+        raise ValueError('Not enough data to normalize by average genome size')
     if project.samples[sample_id].rpkm_scaling_factor == 0.0 and (
             metric in ['efpkm', 'fpkm', 'erpkm', 'rpkm']
     ):
-        print('Not enough data to normalize by sample size. Fall back to raw counts.')
-        if project.samples[sample_id].is_paired_end:
-            metric = 'fragmentcount'
-        else:
-            metric = 'readcount'
+        raise ValueError('Not enough data to normalize by sample size')
 
     scores_function = get_function_scores(project, sample_id, metric=metric)
     scores_function_taxonomy = get_function_taxonomy_scores(project, sample_id, metric=metric)

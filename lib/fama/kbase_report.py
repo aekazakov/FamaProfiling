@@ -15,10 +15,13 @@ def compose_run_info(project, sample_labels, tab_index):
                   '</p>')
     for sample_id in project.list_samples():
         if sample_id in sample_labels:
-            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' + project.samples[sample_id].sample_name + '">' + sample_labels[sample_id] + '</a></h4>')
+            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' +
+                          project.samples[sample_id].sample_name + '">' +
+                          sample_labels[sample_id] + '</a></h4>')
         else:
-            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' + project.samples[sample_id].sample_name + '">' + project.samples[sample_id].sample_name + '</a></h4>')
-            
+            result.append('<h4>Input object: <a href="https://narrative.kbase.us/#dataview/' +
+                          project.samples[sample_id].sample_name + '">' +
+                          project.samples[sample_id].sample_name + '</a></h4>')
         if project.samples[sample_id].is_paired_end:
             result.append('<p>Total number of forward reads: ' +
                           str(project.options.get_fastq1_readcount(sample_id)) +
@@ -96,7 +99,9 @@ def compose_functional_profile(project, sample_id, tab_index):
             if metric == 'readcount' or metric == 'fragmentcount':
                 result.append('<td>' + str(int(scores[function][sample_id][metric])) + '</td>')
             else:
-                result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) + '</td>')
+                result.append('<td>' + '{0:.5f}'.format(scores[function][sample_id][metric]) +
+                              '</td>'
+                              )
             if metric != 'readcount':
                 result.append('<td>' +
                               '{0:.0f}'.format(scores[function][sample_id]['count']) + '</td>'
@@ -209,7 +214,7 @@ def compose_taxonomy_profile(project, sample_id, tab_index):
     result = '<div id="tab' + tab_index + '" class="tabcontent">\n'
     result += taxonomy_df.to_html(na_rep="")
     result += '\n</div>\n'
-    return result #taxonomy_df.to_html(na_rep="")  # , float_format=lambda x: '%.2f' % x)
+    return result
 
 
 def compose_protein_list(project, sample_labels, tab_index):
@@ -225,7 +230,6 @@ def compose_protein_list(project, sample_labels, tab_index):
     result.append('</thead></tr>')
 
     for sample_id in project.list_samples():
-    #sample_id = project.list_samples()[0]
         if 'pe1' in project.samples[sample_id].reads:
 
             for protein_id in sorted(project.samples[sample_id].reads['pe1'].keys()):
@@ -263,18 +267,31 @@ def generate_html_report(outfile, project, sample_labels):
                 line = line.rstrip('\n\r')
                 if line == '<\InsertButtons>':
                     tab_counter = 1
-                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                             str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
                     report_tabs.append(compose_run_info(project, sample_labels, str(tab_counter)))
                     for sample_id in project.list_samples():
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Functional profile</button>')
-                        report_tabs.append(compose_functional_profile(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) +
+                                 '\')" id="defaultOpen">Functional profile</button>')
+                        report_tabs.append(compose_functional_profile(project,
+                                                                      sample_id,
+                                                                      str(tab_counter)))
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Functional groups</button>')
-                        report_tabs.append(compose_function_groups(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) +
+                                 '\')" id="defaultOpen">Functional groups</button>')
+                        report_tabs.append(compose_function_groups(project,
+                                                                   sample_id,
+                                                                   str(tab_counter)))
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Taxonomy profile</button>')
-                        report_tabs.append(compose_taxonomy_profile(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) +
+                                 '\')" id="defaultOpen">Taxonomy profile</button>')
+                        report_tabs.append(compose_taxonomy_profile(project,
+                                                                    sample_id,
+                                                                    str(tab_counter)))
                 elif line == '<\InsertTabs>':
                     of.write('\n'.join(report_tabs))
                 else:
@@ -291,22 +308,40 @@ def generate_protein_html_report(outfile, project, sample_labels):
                 line = line.rstrip('\n\r')
                 if line == '<\InsertButtons>':
                     tab_counter = 1
-                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
-                    report_tabs.append(compose_run_info(project, sample_labels, str(tab_counter)))
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                             str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
+                    report_tabs.append(compose_run_info(project,
+                                                        sample_labels,
+                                                        str(tab_counter)))
                     tab_counter += 1
-                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">Protein list</button>')
-                    report_tabs.append(compose_protein_list(project, sample_labels, str(tab_counter)))
+                    of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                             str(tab_counter) + '\')" id="defaultOpen">Protein list</button>')
+                    report_tabs.append(compose_protein_list(project,
+                                                            sample_labels,
+                                                            str(tab_counter)))
 
                     for sample_id in project.list_samples():
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Functional profile</button>')
-                        report_tabs.append(compose_functional_profile(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) + '\')" id="defaultOpen">' +
+                                 sample_labels[sample_id] + '<br>Functional profile</button>')
+                        report_tabs.append(compose_functional_profile(project,
+                                                                      sample_id,
+                                                                      str(tab_counter)))
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Functional groups</button>')
-                        report_tabs.append(compose_function_groups(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) + '\')" id="defaultOpen">' +
+                                 sample_labels[sample_id] + '<br>Functional groups</button>')
+                        report_tabs.append(compose_function_groups(project,
+                                                                   sample_id,
+                                                                   str(tab_counter)))
                         tab_counter += 1
-                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' + str(tab_counter) + '\')" id="defaultOpen">' + sample_labels[sample_id] + '<br>Taxonomy profile</button>')
-                        report_tabs.append(compose_taxonomy_profile(project, sample_id, str(tab_counter)))
+                        of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
+                                 str(tab_counter) + '\')" id="defaultOpen">' +
+                                 sample_labels[sample_id] + '<br>Taxonomy profile</button>')
+                        report_tabs.append(compose_taxonomy_profile(project,
+                                                                    sample_id,
+                                                                    str(tab_counter)))
                 elif line == '<\InsertTabs>':
                     of.write('\n'.join(report_tabs))
                 else:

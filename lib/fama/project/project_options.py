@@ -182,7 +182,7 @@ class ProjectOptions(object):
             sample (str): sample identifier
             end (str): end identifier
         """
-        result = None
+        result = ''
         if end == 'pe1':
             if self.parser.has_option(sample, 'fastq_pe1'):
                 result = self.parser[sample]['fastq_pe1']

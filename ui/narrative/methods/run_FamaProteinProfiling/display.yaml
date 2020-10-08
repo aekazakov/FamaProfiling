@@ -4,7 +4,7 @@
 name: Run Fama Protein Profiling
 
 tooltip: |
-    Run functional profiling of genome proteins with Fama
+    Generate a functional profile of proteins from one or several genomes with Fama
 
 screenshots: []
 
@@ -28,31 +28,61 @@ parameters :
         ui-name : |
             Genomes
         short-hint : |
-            Select genome objects
+            Select one or several genomes
         long-hint : |
-            Select genome objects
+            Select one or several genome objects
     ref_dataset:
         ui-name : |
             Reference Dataset
         short-hint : |
-            Choose reference dataset for profiling
+            Choose a reference dataset for profiling from the list
         long-hint : |
-            Choose one of the reference datasets for profiling: nitrogen cycle proteins, unversal marker proteins, ribosomal protein L6
+            For functional profiling of nitrogen cycle, choose nitrogen cycle proteins. For taxonomic profiling, choose either unversal marker proteins or ribosomal protein L6 dataset.
     output_feature_set_name:
         ui-name : |
             Output Feature Set name
         short-hint : |
             Enter name for filtered feature set
         long-hint : |
-            Enter name for filtered feature set
+            The app will create a feature set containing a list of functional genes. Choose a name for the feature set.
     output_annotation_name:
         ui-name : |
             Annotation prefix
         short-hint : |
             Prefix for annotation names, to be added to genome names
         long-hint : |
-            Enter prefix for names of functional annotations objects
+            The app will create one or several annotation objects, one for each input genome, with names consisting of a prefix added to the genome name. Enter the prefix for names of functional annotations objects.
 
 description : |
-    <p>This is a KBase wrapper for protein functional profiling module of Fama.</p>
-    <p>Basically, the functional profiling procedure consists of running two similarity searches using DIAMOND, a very fast sequence aligner. The first search selects candidate sequences, while the second search removes false hits.</p>
+    <p>This app is based on Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes (https://github.com/novichkov-lab/fama). Initially created for functional profiling of microbial communities, Fama can be used for functional genes of interest in annotated genome assemblies as well.</p>
+
+    <p>Fama Protein Profiling runs similarity search for all predicted proteins in a genome using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
+    
+    <p>Currently, three reference datasets are available in Fama Profiling:</p>
+    <ul>
+        <li>nitrogen cycle enzymes dataset for functional and taxonomic profiling of nitrate/nitrite/ammonia metabolic genes</li>
+        <li>30 families of universal single-copy marker proteins from complete bacterial and archaeal genomes for taxonomic profiling and check for contamination</li>
+        <li>Ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling.</li>
+    </ul>
+
+    <p>Fama Profiling output includes report in HTML format, tables with results in Excel format and interactive plot.</p>
+    
+    <p><strong> Additional resources</strong></p>
+    <ul><li><a href="https://iseq.lbl.gov/fama/">More info about Fama</a></li>
+    <li><a href="https://narrative.kbase.us/narrative/74172">Example narrative</a></li></ul>
+
+publications :
+    -
+        display-text: |
+            Kazakov A, Novichkov P (2019) Fama: a computational tool for comparative analysis of shotgun metagenomic data. Great Lakes Bioinformatics conference (poster presentation).
+        link: https://iseq.lbl.gov/mydocs/fama_glbio2019_poster.pdf
+    -
+        pmid: 25402007
+        display-text: |
+            Publication about third-party program used by Fama: Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi: 10.1038/nmeth.3176.
+        link: https://pubmed.ncbi.nlm.nih.gov/25402007/
+    -
+        pmid: 25853934
+        display-text: |
+            Publication about third-party program used by Fama: Nayfach S, Pollard KS. (2015) Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biol 16(1):51. doi: 10.1186/s13059-015-0611-7.
+        link: https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/25853934/

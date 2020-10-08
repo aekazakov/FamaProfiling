@@ -2,6 +2,7 @@
 import os
 import time
 import unittest
+import shutil
 from subprocess import Popen, PIPE, CalledProcessError
 from configparser import ConfigParser
 
@@ -43,7 +44,11 @@ class FamaProfilingTest(unittest.TestCase):
         cls.wsClient = Workspace(cls.wsURL)
         cls.serviceImpl = FamaProfiling(cls.cfg)
         cls.scratch = cls.cfg['scratch']
+        cls.suffix = int(time.time() * 1000)
+        cls.wsName = "test_Fama_" + str(cls.suffix)
+        cls.ws_info = cls.wsClient.create_workspace({'workspace': cls.wsName})
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
+        cls.prepare_data()
 
     @classmethod
     def tearDownClass(cls):
@@ -69,38 +74,68 @@ class FamaProfilingTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
+    @classmethod
+    def prepare_data(cls):
+        wd = os.getcwd()
+        print('WORKING DIRECTORY', wd)
+        ru = ReadsUtils(cls.callback_url)
+        test_directory_name = 'fama_test_data'
+        cls.test_directory_path = os.path.join(cls.scratch, test_directory_name)
+        print('TEST DIRECTORY', cls.test_directory_path)
+        os.makedirs(cls.test_directory_path)
+        shutil.copy(os.path.join('data', 'test_fastq_pe1.fq'), cls.test_directory_path)
+        shutil.copy(os.path.join('data', 'test_fastq_pe2.fq'), cls.test_directory_path)
+        reads_params = {'fwd_file': os.path.join(cls.test_directory_path, 'test_fastq_pe1.fq'),
+                        'rev_file': os.path.join(cls.test_directory_path, 'test_fastq_pe2.fq'),
+                        'sequencing_tech': 'Illumina',
+                        'wsname': cls.ws_info[1],
+                        'name': 'Fama_test_pe_input',
+                        'interleaved': 'false'
+                        }        
+        cls.pe_reads_ref = ru.upload_reads(reads_params)
+
+        se_reads_params = {'fwd_file': os.path.join(cls.test_directory_path, 'test_fastq_pe1.fq'),
+                        'sequencing_tech': 'Illumina',
+                        'wsname': cls.ws_info[1],
+                        'name': 'Fama_test_se_input',
+                        'interleaved': 0
+                        }        
+        cls.se_reads_ref = ru.upload_reads(se_reads_params)
+
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    @unittest.skip("")
+#    @unittest.skip("")
     def test_pe_fama_profiling(self):
 
-        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
 #                                                                    'read_library_ref': '22763/10/1',  # 4706 read set (LARGE!)
 #                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
-                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
-#                                                                    'read_library_ref': ru_ret['obj_ref'], # tiny read set (20 + 20 reads), upload from local files
-                                                                    'output_read_library_name': 'Fama_se_test_output'})
+#                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
+                                                                    'read_library_ref': self.pe_reads_ref['obj_ref'], # tiny read set (20 + 20 reads), upload from local files
+                                                                    'output_read_library_name': 'Fama_pe_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
+        print(ret)
         
-    @unittest.skip("")
+#    @unittest.skip("")
     def test_se_fama_profiling(self):
-        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+        ret = self.getImpl().run_FamaProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
-                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
+#                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
+                                                                    'read_library_ref': self.se_reads_ref['obj_ref'],
                                                                     'output_read_library_name': 'Fama_se_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
+        print(ret)
         
-        
-    #@unittest.skip("")
+#    @unittest.skip("")
     def test_protein_fama_profiling(self):
-        ret = self.getImpl().run_FamaProteinProfiling(self.getContext(), {'workspace_name': self.getWsName(),
+        ret = self.getImpl().run_FamaProteinProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
                                                                     'genome_ref': ['22763/32/1', '41747/12/1'],  # S. oneidensis genome
                                                                     'output_annotation_name': 'Fama_Ncycle.',
                                                                     'output_feature_set_name': 'Fama_protein_test_output_featureset'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
-        
+        print(ret)
 
