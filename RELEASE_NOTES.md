@@ -38,3 +38,7 @@
 * Updated report in HTML format
 * Krona chart generation for taxonomic profiles
 
+0.1.1
+-----
+* Added proteincount metric for protein profiling
+* Updated method descriptions
