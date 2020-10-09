@@ -496,7 +496,7 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
         prev_contig = contig
         identifier = None
         if feature['id'] in annotated_features:
-            identifier = feature.id
+            identifier = feature['id']
         elif 'cdss' in feature and feature['cdss'][0] in annotated_features:
             identifier = feature['cdss'][0]
         elif 'aliases' in feature:
@@ -557,3 +557,17 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
 def sanitize_sample_id(sample_id):
     """Replaces slashes with underscores, so KBase refs could be used as sample IDs"""
     return sample_id.replace('/', '_')
+
+
+def genome_proteins_to_fasta(genome_data, scratch):
+    """
+    This function creates protein FASTA file with all protein sequences in a genome object
+
+    """
+    outfasta = os.path.join(scratch, str(uuid.uuid4()) + '_protein.faa')
+    with open(outfasta, 'w') as outfile:
+        for cds in genome_data['cdss']:
+            if 'parent_gene' in cds and 'protein_translation' in cds:
+                outfile.write('>' + cds['parent_gene'] + '\n')
+                outfile.write(cds['protein_translation'] + '\n')
+    return outfasta

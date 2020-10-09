@@ -5,12 +5,11 @@ import uuid
 import time
 from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
-from installed_clients.GenomeFileUtilClient import GenomeFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.WorkspaceClient import Workspace
 
 from installed_clients.baseclient import ServerError 
-#from Fama.fastq_pipeline import functional_profiling_pipeline
+from fama.kbase_wrapper import genome_proteins_to_fasta
 from fama.kbase_wrapper import pe_functional_profiling_pipeline as functional_profiling_pipeline
 from fama.kbase_wrapper import protein_functional_profiling_pipeline
 from fama.kbase_wrapper import save_domain_annotations
@@ -185,22 +184,18 @@ class FamaProfiling:
         #BEGIN run_FamaProteinProfiling
 
         # Import protein sequences from input genome_ref
+        ws_client = Workspace(self.ws_url)
         input_genome_refs = params['genome_ref']
         fama_reference = params['ref_dataset']
         input_proteins = {}
         for input_genome_ref in input_genome_refs:
+            genome_data = ws_client.get_objects2({'objects': [{'ref': input_genome_ref}]})['data'][0]['data']
+            proteins = genome_proteins_to_fasta(genome_data, self.shared_folder)
             input_proteins[input_genome_ref] = {}
-            protein2fasta_params = {'genome_ref': input_genome_ref,
-                            'include_functions': 'false',
-                            'include_aliases': 'false'
-                            }
-            gfu = GenomeFileUtil(self.callback_url)
-            proteins = gfu.genome_proteins_to_fasta(protein2fasta_params)['file_path']
             input_proteins[input_genome_ref]['fwd_path'] = proteins
 
         self.log('Input sequence files:', str(input_proteins))
         self.log('reference: ', fama_reference)
-        ws_client = Workspace(self.ws_url)
         # Run Fama
         fama_params = {'input_proteins': input_proteins,
                        'work_dir': self.shared_folder,

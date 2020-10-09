@@ -42,3 +42,8 @@
 -----
 * Added proteincount metric for protein profiling
 * Updated method descriptions
+
+1.0.0
+----
+* First released version
+* Output objects of protein profiling use gene identifiers instead of protein identifiers
