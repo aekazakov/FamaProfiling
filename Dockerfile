@@ -30,7 +30,7 @@ RUN mkdir -p /kb/deployment/bin/krona && \
     cd Krona/KronaTools && \
     ./install.pl --prefix /kb/deployment/bin/
 
-RUN pip install statsmodels mathstats xlsxwriter fpdf
+RUN pip install statsmodels mathstats xlsxwriter fpdf numpy 'pandas==1.0.5'
 
 # -----------------------------------------
 
