@@ -135,7 +135,7 @@ def pe_functional_profiling_pipeline(params):
             report_files[krona_output] = \
                 sanitize_file_name(sample_id + '_function_taxonomy_profile_chart.html')
             output['krona_charts'][krona_output + '.zip'] = \
-                (sanitize_file_name(sample_id + '_function_taxonomy_chart.html'),
+                (sanitize_file_name(sample_id + '_function_taxonomy_profile_chart.html'),
                 sample_id + ' function taxonomy chart')
         else:
             print('Krona diagram file not found:', krona_file)
@@ -265,7 +265,7 @@ def protein_functional_profiling_pipeline(params):
             report_files[krona_output] = \
                 sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
             output['krona_charts'][krona_output + '.zip'] = \
-                (sanitize_file_name(genome_name + '_function_taxonomy_chart.html'),
+                (sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html'),
                 sample_id + ' function taxonomy chart')
         else:
             print('Krona diagram file not found:', krona_file)
