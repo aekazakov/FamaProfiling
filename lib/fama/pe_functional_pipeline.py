@@ -266,8 +266,23 @@ def fastq_pe_pipeline(project, sample_identifier=None, end_identifier=None):
                                       sample=project.samples[sample_id])
         export_sample(project.samples[sample_id])
         # Generate output for the sample or delete sample from memory
-        generate_sample_report(project, sample_id)
         project.options.set_sample_data(project.samples[sample_id])
+
+    metric = None
+    for sample_id in project.list_samples():
+        if project.is_paired_end():
+            metric = 'efpkg'
+            for sample_id in project.list_samples():
+                if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                    metric = 'fragmentcount'
+        else:
+            metric = 'erpkg'
+            for sample_id in project.list_samples():
+                if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                    metric = 'readcount'
+    # Generate output for all samples
+    for sample_id in project.list_samples():
+        generate_sample_report(project, sample_id, metric=metric)
 
     # Generate output for the project
     if sample_identifier is None:

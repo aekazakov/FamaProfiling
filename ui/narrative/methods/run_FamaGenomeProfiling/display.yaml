@@ -1,14 +1,14 @@
 #
 # define display information
 #
-name: Run Fama Protein Profiling
+name: Run Fama Genome Profiling - v1.0
 
 tooltip: |
-    Generate a functional profile of proteins from one or several genomes with Fama
+    Generate a functional profile of genomes with Fama
 
 screenshots: []
 
-icon: icon.png
+icon: fama-cyan.png
 
 #
 # define a set of similar apps that might be useful to the user
@@ -37,7 +37,7 @@ parameters :
         short-hint : |
             Choose a reference dataset for profiling from the list
         long-hint : |
-            For functional profiling of nitrogen cycle, choose nitrogen cycle proteins. For taxonomic profiling, choose either unversal marker proteins or ribosomal protein L6 dataset.
+            For functional profiling of nitrogen cycle, choose nitrogen cycle proteins. For taxonomic profiling, choose either universal marker proteins or ribosomal protein L6 dataset.
     output_feature_set_name:
         ui-name : |
             Output Feature Set name
@@ -54,9 +54,9 @@ parameters :
             The app will create one or several annotation objects, one for each input genome, with names consisting of a prefix added to the genome name. Enter the prefix for names of functional annotations objects.
 
 description : |
-    <p>This app is based on Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes (https://github.com/novichkov-lab/fama). Initially created for functional profiling of microbial communities, Fama can be used for functional genes of interest in annotated genome assemblies as well.</p>
+    <p>This app is based on the Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes. Initially created for functional profiling of microbial communities, Fama can be used for functional genes of interest in annotated genome assemblies as well.</p>
 
-    <p>Fama Protein Profiling runs similarity search for all predicted proteins in a genome using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
+    <p>Fama Protein Profiling runs a similarity search for all predicted proteins in a genome using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
     
     <p>Currently, three reference datasets are available in Fama Profiling:</p>
     <ul>
@@ -74,15 +74,15 @@ description : |
 publications :
     -
         display-text: |
-            Kazakov A, Novichkov P (2019) Fama: a computational tool for comparative analysis of shotgun metagenomic data. Great Lakes Bioinformatics conference (poster presentation).
+            Kazakov A, Novichkov P. Fama: a computational tool for comparative analysis of shotgun metagenomic data. Great Lakes Bioinformatics conference (poster presentation). 2019.
         link: https://iseq.lbl.gov/mydocs/fama_glbio2019_poster.pdf
     -
         pmid: 25402007
         display-text: |
-            Publication about third-party program used by Fama: Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi: 10.1038/nmeth.3176.
+            Buchfink B, Xie C, Huson DH. Fast and sensitive protein alignment using DIAMOND. Nature Methods. 2015;12: 59-60. doi: 10.1038/nmeth.3176. Publication about third-party program used by Fama.
         link: https://pubmed.ncbi.nlm.nih.gov/25402007/
     -
         pmid: 25853934
         display-text: |
-            Publication about third-party program used by Fama: Nayfach S, Pollard KS. (2015) Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biol 16(1):51. doi: 10.1186/s13059-015-0611-7.
+            Nayfach S, Pollard KS. Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biology. 2015;16: 51. doi: 10.1186/s13059-015-0611-7. Publication about third-party program used by Fama.
         link: https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/25853934/

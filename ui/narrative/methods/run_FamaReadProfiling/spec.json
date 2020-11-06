@@ -1,24 +1,24 @@
 {
-    "ver": "0.0.1",
+    "ver": "1.0.1",
     "authors": [
         "kazakov"
     ],
-    "contact": "",
-    "categories": ["active","sequence"],
+    "contact": "http://www.kbase.us/support",
+    "categories": ["active","communities"],
     "widgets": {
         "input": null,
         "output": "no-display"
     },
     "parameters": [ 
         {
-            "id": "genome_ref",
+            "id": "read_library_refs",
             "optional": false,
             "advanced": false,
             "allow_multiple": true,
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": ["KBaseGenomes.Genome"]
+                "valid_ws_types": ["KBaseAssembly.PairedEndLibrary","KBaseFile.PairedEndLibrary","KBaseAssembly.SingleEndLibrary","KBaseFile.SingleEndLibrary"]
             }
         },
        {
@@ -32,19 +32,19 @@
               "options": [
                 {
                   "value": "nitrogen",
-                  "display": "Nitrogen cycle genes",
+                  "display": "Nitrogen cycle genes, v.1.4",
                   "id": "nitrogen",
                   "ui_name": "nitrogen"
                 },
                 {
                   "value": "universal",
-                  "display": "Universal single-copy marker genes",
+                  "display": "Universal single-copy marker genes, v.1.4",
                   "id": "universal",
                   "ui_name": "universal"
                 },
                 {
                   "value": "rpl6",
-                  "display": "Ribosomal protein L6",
+                  "display": "Ribosomal protein L6, v.1.4",
                   "id": "rpl6",
                   "ui_name": "rpl6"
                 }
@@ -52,26 +52,31 @@
             }
         },
         {
-            "id" : "output_feature_set_name",
+            "id" : "is_paired_end",
             "optional" : false,
             "advanced" : false,
             "allow_multiple" : false,
-            "default_values" : [ "Fama.filtered.features" ],
-            "field_type" : "text",
-            "text_options" : {
-                "valid_ws_types" : [],
-                "is_output_name":true
-            }
+            "default_values" : [ 1 ],
+            "field_type" : "dropdown",
+            "dropdown_options":{
+                "options": [{
+                    "value": 1,
+                    "display": "Paired End"
+                }, {
+                    "value": 0,
+                    "display": "Single End"
+                }]
+            }            
         },
         {
-            "id" : "output_annotation_name",
+            "id" : "output_read_library_name",
             "optional" : false,
             "advanced" : false,
             "allow_multiple" : false,
-            "default_values" : [ "Fama.annotations." ],
+            "default_values" : [ "Fama.filtered.reads" ],
             "field_type" : "text",
             "text_options" : {
-                "valid_ws_types" : [],
+                "valid_ws_types" : ["KBaseFile.SingleEndLibrary", "KBaseFile.PairedEndLibrary"],
                 "is_output_name":true
             }
         }
@@ -80,15 +85,15 @@
         "service-mapping": {
             "url": "",
             "name": "FamaProfiling",
-            "method": "run_FamaProteinProfiling",
+            "method": "run_FamaReadProfiling",
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",
                     "target_property": "workspace_name"
                 },
                 {
-                    "input_parameter": "genome_ref",
-                    "target_property": "genome_ref",
+                    "input_parameter": "read_library_refs",
+                    "target_property": "read_library_refs",
                      "target_type_transform": "resolved-ref"
                 },
                 {
@@ -96,12 +101,12 @@
                     "target_property": "ref_dataset"
                 },
                 {
-                    "input_parameter": "output_feature_set_name",
-                    "target_property": "output_feature_set_name"
+                    "input_parameter": "is_paired_end",
+                    "target_property": "is_paired_end"
                 },
                 {
-                    "input_parameter": "output_annotation_name",
-                    "target_property": "output_annotation_name"
+                    "input_parameter": "output_read_library_name",
+                    "target_property": "output_read_library_name"
                 }
             ],
             "output_mapping": [

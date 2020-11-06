@@ -21,33 +21,37 @@ ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
                        'rpl6': 'Fama_rpl6_v.1.2_function_set'}
 
 
-def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset, input_ref):
+def pe_functional_profiling_pipeline(params):
     """Function calling functional profiling for fastq files"""
-    work_dir = os.path.join(scratch, str(uuid.uuid4()))
+    
+    #params: fastq_fwd, fastq_rev, scratch, ref_dataset, input_ref
+    
+    work_dir = os.path.join(params['work_dir'], str(uuid.uuid4()))
     os.mkdir(work_dir)
 
     config_file = write_config_file(work_dir)
-    input_paths = {}
-    input_paths[input_ref] = {}
-    input_paths[input_ref]['fwd_path'] = fastq_fwd
-    if fastq_rev is not None:
-        input_paths[input_ref]['rev_path'] = fastq_rev
-    project_file = write_project_file(input_paths, ref_dataset, work_dir)
+    #~ input_paths = {}
+    #~ input_paths[input_ref] = {}
+    #~ input_paths[input_ref]['fwd_path'] = fastq_fwd
+    #~ if params['is_paired_end'] == 1:
+        #~ input_paths[input_ref]['rev_path'] = fastq_rev
+    project_file = write_project_file(params['input_reads'], params['reference'], work_dir, params['is_paired_end'])
     project = Project(config_file=config_file, project_file=project_file)
 
-    if fastq_rev is None:
-        project = fastq_se_pipeline(project)
-    else:
+    if params['is_paired_end'] == 1:
         project = fastq_pe_pipeline(project)
+    else:
+        project = fastq_se_pipeline(project)
 
     out_dir = os.path.join(work_dir, 'out')
     os.mkdir(out_dir)
     # export_reads
     output = {}
+    output['krona_charts'] = {}
     out_fwd_fastq = os.path.join(work_dir, 'out_fwd.fastq')
 
     sample_id = project.list_samples()[0]
-    if project.samples[sample_id].is_paired_end:
+    if params['is_paired_end'] == 1:
         out_rev_fastq = os.path.join(work_dir, 'out_rev.fastq')
     else:
         out_rev_fastq = ''
@@ -59,7 +63,7 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset,
 
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_html_report(out_report, project, {})  # TODO: add object names
+    generate_html_report(out_report, project, params['name2ref'])
     with zipfile.ZipFile(out_report + '.zip', 'w',
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
@@ -68,48 +72,73 @@ def pe_functional_profiling_pipeline(fastq_fwd, fastq_rev, scratch, ref_dataset,
 
     # TODO: Krona charts generate_functions_chart(parser_fwd)
     report_files = {}
-    if project.samples[sample_id].is_paired_end:
+    if params['is_paired_end'] == 1:
         metric = 'efpkg'
-        if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+        rawcount_flag = False
+        for sample_id in project.list_samples():
+            if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                rawcount_flag = True
+        if rawcount_flag:
             metric = 'fragmentcount'
     else:
         metric = 'erpkg'
-        if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+        rawcount_flag = False
+        for sample_id in project.list_samples():
+            if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                rawcount_flag = True
+        if rawcount_flag:
             metric = 'readcount'
 
-    report_files[out_report + '.zip'] = 'fama_report.html'
+    report_files[out_report] = 'fama_report.html'
+    project_xlsx_report = sanitize_file_name(os.path.join(
+        project.options.work_dir,
+        project.options.project_name + '_' + metric + '_functions.xlsx'
+        ))
+    if os.path.exists(project_xlsx_report):
+        report_files[project_xlsx_report] = 'Functional_profiles_combined.xlsx'
+    else:
+        print('Project XLSX file not found:', project_xlsx_report)
 
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
         project.options.project_name + '_' + metric + '_functions_taxonomy.xlsx'
         ))
     if os.path.exists(project_xlsx_report):
-        report_files[project_xlsx_report] = 'function_taxonomy_profile_short.xlsx'
+        report_files[project_xlsx_report] = 'Function_taxonomy_profiles_combined.xlsx'
     else:
         print('Project XLSX file not found:', project_xlsx_report)
-    sample_xlsx_report = sanitize_file_name(os.path.join(
-        project.options.work_dir,
-        sample_id + '_' + metric + '_functions_taxonomy.xlsx'
-        ))
-    if os.path.exists(sample_xlsx_report):
-        report_files[sample_xlsx_report] = 'function_taxonomy_profile_full.xlsx'
-    else:
-        print('Sample XLSX file not found:', sample_xlsx_report)
-    krona_file = sanitize_file_name(os.path.join(
-        project.options.work_dir,
-        sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
-        ))
-    if os.path.exists(krona_file):
-        krona_output = os.path.join(out_dir, 'function_taxonomy_profile_chart.html')
-        shutil.copy2(krona_file, krona_output)
-        with zipfile.ZipFile(krona_output + '.zip', 'w',
-                             zipfile.ZIP_DEFLATED,
-                             allowZip64=True) as zip_file:
-            zip_file.write(krona_output, 'function_taxonomy_profile_chart.html')
-        report_files[krona_output + '.zip'] = 'function_taxonomy_profile_chart.html'
-        output['krona_chart'] = krona_output + '.zip'
-    else:
-        print('Krona diagram file not found:', krona_file)
+    for sample_id in project.list_samples():
+        sample_xlsx_report = sanitize_file_name(os.path.join(
+            project.options.work_dir,
+            sample_id + '_' + metric + '_functions_taxonomy.xlsx'
+            ))
+        if os.path.exists(sample_xlsx_report):
+            report_files[sample_xlsx_report] = sanitize_file_name(sample_id + ' function taxonomy profile long.xlsx')
+        else:
+            print('Sample XLSX file not found:', sample_xlsx_report)
+
+        krona_file = sanitize_file_name(os.path.join(
+            project.options.work_dir,
+            sample_id + '_' + metric + '_functional_taxonomy_profile.xml.html'
+            ))
+        if os.path.exists(krona_file):
+            krona_output = \
+                sanitize_file_name(os.path.join(out_dir, sample_id +
+                                   '_function_taxonomy_profile_chart.html'))
+            shutil.copy2(krona_file, krona_output)
+            with zipfile.ZipFile(krona_output + '.zip', 'w',
+                                 zipfile.ZIP_DEFLATED,
+                                 allowZip64=True) as zip_file:
+                zip_file.write(krona_output,
+                               sanitize_file_name(sample_id +
+                                                  '_function_taxonomy_profile_chart.html'))
+            report_files[krona_output] = \
+                sanitize_file_name(sample_id + '_function_taxonomy_profile_chart.html')
+            output['krona_charts'][krona_output + '.zip'] = \
+                (sanitize_file_name(sample_id + '_function_taxonomy_chart.html'),
+                sample_id + ' function taxonomy chart')
+        else:
+            print('Krona diagram file not found:', krona_file)
 
     output_files = list()
     result_file = os.path.join(project.options.work_dir, 'Fama_result.zip')
@@ -134,7 +163,8 @@ def protein_functional_profiling_pipeline(params):
                'ws_name': params['workspace_name'],
                'ws_client': ws_client,
                'featureset_name': params['output_feature_set_name'],
-               'annotation_prefix': params['output_annotation_name']
+               'annotation_prefix': params['output_annotation_name'],
+               'name2ref' : name2ref
              }
     """
 
@@ -158,10 +188,18 @@ def protein_functional_profiling_pipeline(params):
     metric = 'proteincount'
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
+        project.options.project_name + '_' + metric + '_functions.xlsx'
+        ))
+    if os.path.exists(project_xlsx_report):
+        report_files[project_xlsx_report] = 'Functional_profiles_combined.xlsx'
+    else:
+        print('Project XLSX file not found:', project_xlsx_report)
+    project_xlsx_report = sanitize_file_name(os.path.join(
+        project.options.work_dir,
         project.options.project_name + '_' + metric + '_functions_taxonomy.xlsx'
         ))
     if os.path.exists(project_xlsx_report):
-        report_files[project_xlsx_report] = 'function_taxonomy_profile_short.xlsx'
+        report_files[project_xlsx_report] = 'Function_taxonomy_profiles_combined.xlsx'
     else:
         print('Project XLSX file not found:', project_xlsx_report)
     project_text_report = sanitize_file_name(os.path.join(
@@ -188,7 +226,7 @@ def protein_functional_profiling_pipeline(params):
         annotation_obj_ref, feature_ids, genome_name = \
             save_domain_annotations(project, dms_ref, params['ws_name'],
                                     params['ws_client'], params['annotation_prefix'],
-                                    sample_id)
+                                    sample_id, params['name2ref'][sample_id])
         genome_names[sample_id] = genome_name
         objects_created.append({'ref': annotation_obj_ref,
                                 'description': 'Functional annotations for genome '
@@ -196,7 +234,7 @@ def protein_functional_profiling_pipeline(params):
         for feature_id in feature_ids:
             if feature_id not in featureset_elements:
                 featureset_elements[feature_id] = []
-            featureset_elements[feature_id].append(project.samples[sample_id].sample_name)
+            featureset_elements[feature_id].append(params['name2ref'][sample_id]) # project.samples[sample_id].sample_name)
             featureset_element_ordering.append(feature_id)
 
         sample_xlsx_report = sanitize_file_name(os.path.join(
@@ -205,7 +243,7 @@ def protein_functional_profiling_pipeline(params):
             ))
         if os.path.exists(sample_xlsx_report):
             report_files[sample_xlsx_report] = \
-                sanitize_file_name(genome_name + '_function_taxonomy_profile_full.xlsx')
+                sanitize_file_name(genome_name + '_function_taxonomy_profile_long.xlsx')
         else:
             print('Sample XLSX file not found:', sample_xlsx_report)
         krona_file = sanitize_file_name(os.path.join(
@@ -227,7 +265,8 @@ def protein_functional_profiling_pipeline(params):
             report_files[krona_output] = \
                 sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
             output['krona_charts'][krona_output + '.zip'] = \
-                sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
+                (sanitize_file_name(genome_name + '_function_taxonomy_chart.html'),
+                sample_id + ' function taxonomy chart')
         else:
             print('Krona diagram file not found:', krona_file)
 
@@ -236,7 +275,7 @@ def protein_functional_profiling_pipeline(params):
                         'elements': featureset_elements}
 
     out_report = os.path.join(out_dir, 'fama_report.html')
-    generate_protein_html_report(out_report, project, genome_names)
+    generate_protein_html_report(out_report, project, params['name2ref'])
     with zipfile.ZipFile(out_report + '.zip', 'w',
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zip_file:
@@ -313,7 +352,7 @@ background_db_size = 4769946
     return ret_val
 
 
-def write_project_file(input_paths, ref_dataset, work_dir):
+def write_project_file(input_paths, ref_dataset, work_dir, is_paired_end=0):
     ret_val = os.path.join(work_dir, 'project.ini')
 
     with open(ret_val, 'w') as of:
@@ -337,10 +376,10 @@ def write_project_file(input_paths, ref_dataset, work_dir):
         for sample_id in input_paths:
             of.write('\n\n[' + sanitize_sample_id(sample_id) + ']\nsample_id = ' +
                      sample_id + '\nfastq_pe1 = ')
-            of.write(input_paths[sample_id]['fwd_path'])
-            if 'rev_path' in input_paths[sample_id]:
+            of.write(input_paths[sample_id]['fwd'])
+            if is_paired_end == 1:
                 of.write('\nfastq_pe2 = ')
-                of.write(input_paths[sample_id]['rev_path'])
+                of.write(input_paths[sample_id]['rev'])
             of.write('\nsample_dir = ')
             of.write(os.path.join(work_dir, sanitize_sample_id(sample_id)))
             of.write('\nreplicate = 0\n')
@@ -468,9 +507,9 @@ def get_dms(reference_id, ref_path, ws_name, ws_client):
     return dms_ref
 
 
-def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, sample_id):
+def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, sample_id, genome_ref):
 
-    ret = ws_client.get_objects2({'objects': [{'ref': project.samples[sample_id].sample_name}]})
+    ret = ws_client.get_objects2({'objects': [{'ref': genome_ref}]})
     genome = ret['data'][0]['data']
     genome_name = ret['data'][0]['info'][1]
     annotated_features = set()
@@ -538,7 +577,7 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, s
         feature_to_contig_and_index[identifier] = (contig, feature_index)
     contig_to_size_and_feature_count[prev_contig] = (feature_count, max_start)
 
-    annotation_obj = {'genome_ref': project.samples[sample_id].sample_name,
+    annotation_obj = {'genome_ref': genome_ref,  # project.samples[sample_id].sample_name,
                       'used_dms_ref': dms_ref,
                       'data': data,
                       'contig_to_size_and_feature_count': contig_to_size_and_feature_count,

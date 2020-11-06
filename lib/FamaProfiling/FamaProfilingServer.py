@@ -17,7 +17,7 @@ from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError, \
 from jsonrpcbase import ServerError as JSONServerError
 
 from biokbase import log
-from FamaProfiling.authclient import KBaseAuth as _KBaseAuth
+from authclient import KBaseAuth as _KBaseAuth
 
 try:
     from ConfigParser import ConfigParser
@@ -51,7 +51,7 @@ def get_config():
 
 config = get_config()
 
-from FamaProfiling.FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
+from FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
 impl_FamaProfiling = FamaProfiling(config)
 
 
@@ -338,14 +338,14 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
-        self.rpc_service.add(impl_FamaProfiling.run_FamaProfiling,
-                             name='FamaProfiling.run_FamaProfiling',
+        self.rpc_service.add(impl_FamaProfiling.run_FamaReadProfiling,
+                             name='FamaProfiling.run_FamaReadProfiling',
                              types=[dict])
-        self.method_authentication['FamaProfiling.run_FamaProfiling'] = 'required'  # noqa
-        self.rpc_service.add(impl_FamaProfiling.run_FamaProteinProfiling,
-                             name='FamaProfiling.run_FamaProteinProfiling',
+        self.method_authentication['FamaProfiling.run_FamaReadProfiling'] = 'required'  # noqa
+        self.rpc_service.add(impl_FamaProfiling.run_FamaGenomeProfiling,
+                             name='FamaProfiling.run_FamaGenomeProfiling',
                              types=[dict])
-        self.method_authentication['FamaProfiling.run_FamaProteinProfiling'] = 'required'  # noqa
+        self.method_authentication['FamaProfiling.run_FamaGenomeProfiling'] = 'required'  # noqa
         self.rpc_service.add(impl_FamaProfiling.status,
                              name='FamaProfiling.status',
                              types=[dict])

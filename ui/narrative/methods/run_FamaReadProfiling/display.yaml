@@ -1,14 +1,14 @@
 #
 # define display information
 #
-name: Run Fama Profiling
+name: Run Fama Read Profiling - v1.0
 
 tooltip: |
-    Generate a functional profile of sequence read library with Fama
+    Generate a functional profile of sequence read libraries with Fama
 
 screenshots: []
 
-icon: icon.png
+icon: fama-green.png
 
 #
 # define a set of similar apps that might be useful to the user
@@ -24,20 +24,27 @@ suggestions:
 # Configure the display and description of parameters
 #
 parameters :
-    read_library_ref :
+    read_library_refs :
         ui-name : |
-            Read Library
+            Read Libraries
         short-hint : |
-            A PairedEnd or SingleRead library
+            PairedEnd or SingleRead libraries
         long-hint : |
-            A PairedEnd or SingleRead library
+            PairedEnd or SingleRead libraries
+    is_paired_end :
+        ui-name : |
+            Library type
+        short-hint : |
+            Choose between PairedEnd and SingleRead
+        long-hint : |
+            Choose between PairedEnd and SingleRead
     ref_dataset:
         ui-name : |
             Reference Dataset
         short-hint : |
             Choose a reference dataset for profiling from the list
         long-hint : |
-            For functional profiling of nitrogen cycle, choose nitrogen cycle proteins. For taxonomic profiling, choose either unversal marker proteins or ribosomal protein L6 dataset.
+            For functional profiling of nitrogen cycle, choose nitrogen cycle proteins. For taxonomic profiling, choose either universal marker proteins or ribosomal protein L6 dataset.
     output_read_library_name:
         ui-name : |
             Output Read Library
@@ -47,11 +54,11 @@ parameters :
             The app will create a subset of read sequences mapped to functional genes of interest. Choose a name for the output filtered read library.
 
 description : |
-    <p>Functional profile captures genetic potential of microbial community for biological processes of interest, just like taxonomic profile captures microbial diversity. This app is based on Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes (https://github.com/novichkov-lab/fama).</p>
+    <p>Functional profile captures genetic potential of microbial community for biological processes of interest, just like taxonomic profile captures microbial diversity. This app is based on the Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes.</p>
     
     <p>Fama examines genetic potential of a microbial community and taxonomic composition of functional genes by direct mapping of individual sequence reads to a curated reference set of proteins. This tool has been developed for research projects focused on a specific metabolic process in microbial communities containing uncultured and phylogenetically distinct microbes with little similarity to known genomes. For such organisms, amino acid sequence comparisons have an advantage over nucleotide sequence comparison for characterization of genes.</p>
     
-    <p>Fama runs similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
+    <p>Fama runs a similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
     
     <p>For comparison between functions and between samples, raw read counts are normalized by library size, target gene size and predicted average genome size in the sample. For normalization by average genome size, Fama employs MicrobeCensus tool.</p>
     
@@ -73,15 +80,15 @@ description : |
 publications :
     -
         display-text: |
-            Kazakov A, Novichkov P (2019) Fama: a computational tool for comparative analysis of shotgun metagenomic data. Great Lakes Bioinformatics conference (poster presentation).
+            Kazakov A, Novichkov P. Fama: a computational tool for comparative analysis of shotgun metagenomic data. Great Lakes Bioinformatics conference (poster presentation). 2019.
         link: https://iseq.lbl.gov/mydocs/fama_glbio2019_poster.pdf
     -
         pmid: 25402007
         display-text: |
-            Publication about third-party program used by Fama: Buchfink B, Xie C, Huson DH. (2015) Fast and sensitive protein alignment using DIAMOND. Nat Methods. 12(1):59-60. doi: 10.1038/nmeth.3176.
+            Buchfink B, Xie C, Huson DH. Fast and sensitive protein alignment using DIAMOND. Nature Methods. 2015;12: 59-60. doi: 10.1038/nmeth.3176. Publication about third-party program used by Fama.
         link: https://pubmed.ncbi.nlm.nih.gov/25402007/
     -
         pmid: 25853934
         display-text: |
-            Publication about third-party program used by Fama: Nayfach S, Pollard KS. (2015) Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biol 16(1):51. doi: 10.1186/s13059-015-0611-7.
+            Nayfach S, Pollard KS. Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biology. 2015;16: 51. doi: 10.1186/s13059-015-0611-7. Publication about third-party program used by Fama.
         link: https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/25853934/

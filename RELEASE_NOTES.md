@@ -47,3 +47,20 @@
 ----
 * First released version
 * Output objects of protein profiling use gene identifiers instead of protein identifiers
+
+1.0.1
+----
+* Run Fama Profiling app renamed to Run Fama Read Profiling
+* Run Fama Protein Profiling app renamed to Run Fama Genome Profiling
+* Added support for multiple input read libraries in Run Fama Read Profiling
+* Added supported data types to "valid_ws_types" of output Run Fama Read Profiling object
+* Added "http://www.kbase.us/support" as the "contact" in spec.json of all apps
+* Added app icons
+* Replaced object references with object names in the Run Info tab of HTML report for all apps
+* Added genome name to Krona plot links in Run Fama Genome Profiling
+* Added Excel output with combined functional profile to all apps
+* Changed "readcount" to "proteincount" in HTML report of Run Fama Genome Profiling
+* Changed number format of protein counts in HTML report of Run Fama Genome Profiling
+* Corrected typos in AppDocs
+* Added Fama version 1.0 to app names
+* Added refdata version number to reference dataset names in dropdown lists 

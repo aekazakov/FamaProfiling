@@ -31,9 +31,9 @@ class FamaProfiling:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.1.0"
+    VERSION = "1.0.1"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
-    GIT_COMMIT_HASH = "2c7f322618c0dde0a9c1a9b0af61b5d8a297879b"
+    GIT_COMMIT_HASH = "e01fe981b1c379712454d29e8d4a03c88f57da9e"
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
@@ -51,43 +51,72 @@ class FamaProfiling:
         pass
 
 
-    def run_FamaProfiling(self, ctx, params):
+    def run_FamaReadProfiling(self, ctx, params):
         """
-        This example function accepts any number of parameters and returns results in a KBaseReport
-        :param params: instance of type "FamaProfilingParams" (Run functional
-           profiling module of Fama. workspace_name - the name of the
-           workspace for input/output read_library_ref - the name of the PE
-           read library or SE read library ref_dataset - the name of Fama
-           reference dataset output_read_library_ref - the name of the output
-           filtered PE or SE read library) -> structure: parameter
-           "workspace_name" of String, parameter "read_library_ref" of
-           String, parameter "ref_dataset" of String, parameter
+        Run metagenome functional profiling module of Fama.
+        :param params: instance of type "FamaReadProfilingParams" (Parameters
+           for metagenome functional profiling. workspace_name - the name of
+           the workspace for input/output read_library_refs - references to
+           the name of the PE read library or SE read library ref_dataset -
+           the name of Fama reference dataset is_paired_end - 1 for
+           paired-end library, 0 for single-end library
+           output_read_library_ref - the name of the output filtered PE or SE
+           read library) -> structure: parameter "workspace_name" of String,
+           parameter "read_library_refs" of list of String, parameter
+           "ref_dataset" of String, parameter "is_paired_end" of type "bool"
+           (A boolean - 0 for false, 1 for true. @range (0, 1)), parameter
            "output_read_library_name" of String
-        :returns: instance of type "ReportResults" -> structure: parameter
+        :returns: instance of type "ReportResults" (Output report parameters
+           report_name - the name of the report object report_ref - the
+           reference to the report object) -> structure: parameter
            "report_name" of String, parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
-        #BEGIN run_FamaProfiling
-        
+        #BEGIN run_FamaReadProfiling
         # Import Read Library and save as two paired-end FASTQ files
-        input_ref = params['read_library_ref']
+        input_refs = params['read_library_refs']
         fama_reference = params['ref_dataset']
-        reads_params = {'read_libraries': [input_ref],
+        ws_client = Workspace(self.ws_url)
+        ret = ws_client.get_object_info3({'objects': [{'ref': ref} for ref in input_refs]})
+        name2ref = {}
+        for input_ref in input_refs:
+            ret = ws_client.get_object_info3({'objects': [{'ref': input_ref}]})
+            obj_name = ret['infos'][0][1]
+            name2ref[obj_name] = input_ref
+            
+        reads_params = {'read_libraries': input_refs,
                         'interleaved': 'false',
                         'gzipped': None
                         }
+        input_reads = {}
+
         ru = ReadsUtils(self.callback_url)
         reads = ru.download_reads(reads_params)['files']
 
         print('Input reads files:')
-        fwd_reads_file = reads[input_ref]['files']['fwd']
-        rev_reads_file = reads[input_ref]['files']['rev']
-        print('forward: ' + str(fwd_reads_file))
-        print('reverse: ' + str(rev_reads_file))
+        print(reads)
+        for input_name in name2ref:
+            input_ref = name2ref[input_name]
+            fwd_reads_file = reads[input_ref]['files']['fwd']
+            rev_reads_file = reads[input_ref]['files']['rev']
+            print('forward: ' + str(fwd_reads_file))
+            print('reverse: ' + str(rev_reads_file))
+            input_reads[input_name] = {}
+            input_reads[input_name]['fwd'] = fwd_reads_file
+            input_reads[input_name]['rev'] = rev_reads_file
+
+        fama_params = {'input_reads': input_reads,
+                       'work_dir': self.shared_folder,
+                       'reference': fama_reference,
+                       'is_paired_end' : params['is_paired_end'],
+                       'name2ref' : name2ref
+                       #~ 'ws_name': params['workspace_name'],
+                       #~ 'ws_client': ws_client
+                       }
 
         # Run Fama
-        fama_output = functional_profiling_pipeline(fwd_reads_file, rev_reads_file, self.shared_folder, fama_reference, params['read_library_ref'])
+        fama_output = functional_profiling_pipeline(fama_params)
         
         # Write filtered reads to workspace
         reads_params = {'fwd_file': fama_output['fwd_reads'],
@@ -118,19 +147,20 @@ class FamaProfiling:
                        'name': 'fama_report.html',
                        'label': 'Fama_report'}
                       ]
-        if 'krona_chart' in fama_output:
+        for krona_file in fama_output['krona_charts']:
             try:
-                dfu_output = dfu.file_to_shock({'file_path': fama_output['krona_chart']})
+                dfu_output = dfu.file_to_shock({'file_path': krona_file})
                 html_links.append({'shock_id': dfu_output['shock_id'],
                                    'description': 'Krona chart for function taxonomy profile',
-                                   'name': 'function_taxonomy_profile_chart.html',
-                                   'label': 'Function taxonomy profile chart'}
+                                   'name': fama_output['krona_charts'][krona_file][0],
+                                   'label': fama_output['krona_charts'][krona_file][1]}
                                   )
             except ServerError as dfue:
                 # not really any way to test this block
                 self.log('Logging exception loading results to shock')
                 self.log(str(dfue))
                 raise
+        self.log('Krona chart saved: ' + str(dfu_output))
 
         # Save report
         report_params = {'message': message,
@@ -156,43 +186,67 @@ class FamaProfiling:
             'report_name': report_info['name'],
             'report_ref': report_info['ref']
         }
-        #END run_FamaProfiling
+
+        #END run_FamaReadProfiling
 
         # At some point might do deeper type checking...
         if not isinstance(output, dict):
-            raise ValueError('Method run_FamaProfiling return value ' +
+            raise ValueError('Method run_FamaReadProfiling return value ' +
                              'output is not type dict as required.')
         # return the results
         return [output]
 
-    def run_FamaProteinProfiling(self, ctx, params):
+    def run_FamaGenomeProfiling(self, ctx, params):
         """
-        :param params: instance of type "FamaProteinProfilingParams" (Run
-           protein functional profiling module of Fama. workspace_name - the
-           name of the workspace for input/output genome_ref - reference to a
-           genome object ref_dataset - the name of Fama reference dataset
+        Run genome functional profiling module of Fama.
+        :param params: instance of type "FamaGenomeProfilingParams"
+           (Parameters for genome functional profiling. workspace_name - the
+           name of the workspace for input/output genome_refs - references to
+           a genome object ref_dataset - the name of Fama reference dataset
            output_result_name - the name of the output DomainAnnotation) ->
            structure: parameter "workspace_name" of String, parameter
            "genome_ref" of list of String, parameter "ref_dataset" of String,
            parameter "output_feature_set_name" of String, parameter
            "output_annotation_name" of String
-        :returns: instance of type "ReportResults" -> structure: parameter
+        :returns: instance of type "ReportResults" (Output report parameters
+           report_name - the name of the report object report_ref - the
+           reference to the report object) -> structure: parameter
            "report_name" of String, parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
-        #BEGIN run_FamaProteinProfiling
-
+        #BEGIN run_FamaGenomeProfiling
         # Import protein sequences from input genome_ref
         ws_client = Workspace(self.ws_url)
         input_genome_refs = params['genome_ref']
         fama_reference = params['ref_dataset']
         input_proteins = {}
+        name2ref = {}
         for input_genome_ref in input_genome_refs:
-            genome_data = ws_client.get_objects2({'objects': [{'ref': input_genome_ref}]})['data'][0]['data']
-            proteins = genome_proteins_to_fasta(genome_data, self.shared_folder)
-            input_proteins[input_genome_ref] = {}
-            input_proteins[input_genome_ref]['fwd_path'] = proteins
+            ret = ws_client.get_objects2({'objects': [{'ref': input_genome_ref}]})['data'][0]
+            obj_data = ret['data']
+            obj_name = ret['info'][1]
+            obj_type = ret['info'][2].split('.')[1].split('-')[0]
+            if obj_type == 'GenomeSet':
+                for sub_obj_ref in obj_data['items']:
+                    ret = ws_client.get_objects2({'objects': [{'ref': sub_obj_ref}]})['data'][0]
+                    genome_data = ret['data']
+                    genome_name = ret['info'][1]
+                    if genome_name in name2ref:
+                        raise ServerError('All input genome names must be unique. Check ' + genome_name)
+                    name2ref[genome_name] = sub_obj_ref
+                    proteins = genome_proteins_to_fasta(genome_data, self.shared_folder)
+                    input_proteins[genome_name] = {}
+                    input_proteins[genome_name]['fwd'] = proteins
+            elif obj_type == 'Genome':
+                if obj_name in name2ref:
+                    raise ServerError('All input genome names must be unique')
+                name2ref[obj_name] = input_genome_ref
+                proteins = genome_proteins_to_fasta(obj_data, self.shared_folder)
+                input_proteins[obj_name] = {}
+                input_proteins[obj_name]['fwd'] = proteins
+            else:
+                raise ServerError('Incompatible object: ' + input_genome_ref + ' (' + obj_name + ')')
 
         self.log('Input sequence files:', str(input_proteins))
         self.log('reference: ', fama_reference)
@@ -203,7 +257,8 @@ class FamaProfiling:
                        'ws_name': params['workspace_name'],
                        'ws_client': ws_client,
                        'featureset_name': params['output_feature_set_name'],
-                       'annotation_prefix': params['output_annotation_name']
+                       'annotation_prefix': params['output_annotation_name'],
+                       'name2ref': name2ref
                        }
         fama_output = protein_functional_profiling_pipeline(fama_params)
         objects_created = fama_output['objects_created']
@@ -253,8 +308,8 @@ class FamaProfiling:
                 dfu_output = dfu.file_to_shock({'file_path': krona_file})
                 html_links.append({'shock_id': dfu_output['shock_id'],
                                    'description': 'Krona chart for function taxonomy profile',
-                                   'name': fama_output['krona_charts'][krona_file],
-                                   'label': 'Function taxonomy profile chart'}
+                                   'name': fama_output['krona_charts'][krona_file][0],
+                                   'label': fama_output['krona_charts'][krona_file][1]}
                                   )
             except ServerError as dfue:
                 # not really any way to test this block
@@ -291,11 +346,11 @@ class FamaProfiling:
             'report_ref': report_info['ref']
         }
 
-        #END run_FamaProteinProfiling
+        #END run_FamaGenomeProfiling
 
         # At some point might do deeper type checking...
         if not isinstance(output, dict):
-            raise ValueError('Method run_FamaProteinProfiling return value ' +
+            raise ValueError('Method run_FamaGenomeProfiling return value ' +
                              'output is not type dict as required.')
         # return the results
         return [output]
