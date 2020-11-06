@@ -228,7 +228,13 @@ class FamaProfiling:
             obj_name = ret['info'][1]
             obj_type = ret['info'][2].split('.')[1].split('-')[0]
             if obj_type == 'GenomeSet':
-                for sub_obj_ref in obj_data['items']:
+                print('GenomeSet data', obj_data)
+                genome_refs = []
+                if 'elements' in obj_data:
+                    genome_refs = [item['ref'] for item in obj_data['elements'].values()]
+                elif 'items' in obj_data:
+                    genome_refs = [item['ref'] for item in obj_data['items']]
+                for sub_obj_ref in genome_refs:
                     ret = ws_client.get_objects2({'objects': [{'ref': sub_obj_ref}]})['data'][0]
                     genome_data = ret['data']
                     genome_name = ret['info'][1]

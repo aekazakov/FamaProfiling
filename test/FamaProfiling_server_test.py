@@ -131,7 +131,7 @@ class FamaProfilingTest(unittest.TestCase):
         print(ret)
         
 #    @unittest.skip("")
-    def test_protein_fama_profiling(self):
+    def test_genome_fama_profiling(self):
         ret = self.getImpl().run_FamaGenomeProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
                                                                     'genome_ref': ['22763/32/1', '41747/12/1'],  # S. oneidensis and S. amazonensis genomes
@@ -141,3 +141,15 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
 
+#    @unittest.skip("")
+    def test_genomeset_fama_profiling(self):
+        ret = self.getImpl().run_FamaGenomeProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
+                                                                    'ref_dataset': 'nitrogen',
+                                                                    'genome_ref': ['41747/35/1'],  # two Shewanella genomes
+                                                                    'output_annotation_name': 'Fama_Ncycle.',
+                                                                    'output_feature_set_name': 'Fama_protein_test_output_featureset'})
+        print ('Report name', ret[0]['report_name'])
+        print ('Report reference', ret[0]['report_ref'])
+        print(ret)
+
+        
