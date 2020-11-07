@@ -61,6 +61,7 @@
 * Added Excel output with combined functional profile to all apps
 * Changed "readcount" to "proteincount" in HTML report of Run Fama Genome Profiling
 * Changed number format of protein counts in HTML report of Run Fama Genome Profiling
-* Corrected typos in AppDocs
+* Updated documentation for all apps
 * Added Fama version 1.0 to app names
 * Added refdata version number to reference dataset names in dropdown lists 
+* Added support for input GenomeSet in Read Fama Genome Profiling

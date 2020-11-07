@@ -213,7 +213,7 @@ def compose_taxonomy_profile(project, sample_id, tab_index, metric=None):
     taxonomy_df.replace(0.0, np.nan, inplace=True)
     result = '<div id="tab' + tab_index + '" class="tabcontent">\n'
     if metric in ('readcount', 'fragmentcount', 'proteincount'):
-        result += taxonomy_df.to_html(na_rep="", float_format = '%.0f')
+        result += taxonomy_df.to_html(na_rep="", float_format='%.0f')
     else:
         result += taxonomy_df.to_html(na_rep="")
     result += '\n</div>\n'

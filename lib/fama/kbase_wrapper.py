@@ -23,19 +23,14 @@ ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
 
 def pe_functional_profiling_pipeline(params):
     """Function calling functional profiling for fastq files"""
-    
-    #params: fastq_fwd, fastq_rev, scratch, ref_dataset, input_ref
-    
     work_dir = os.path.join(params['work_dir'], str(uuid.uuid4()))
     os.mkdir(work_dir)
 
     config_file = write_config_file(work_dir)
-    #~ input_paths = {}
-    #~ input_paths[input_ref] = {}
-    #~ input_paths[input_ref]['fwd_path'] = fastq_fwd
-    #~ if params['is_paired_end'] == "1":
-        #~ input_paths[input_ref]['rev_path'] = fastq_rev
-    project_file = write_project_file(params['input_reads'], params['reference'], work_dir, params['is_paired_end'])
+    project_file = write_project_file(params['input_reads'],
+                                      params['reference'],
+                                      work_dir,
+                                      params['is_paired_end'])
     project = Project(config_file=config_file, project_file=project_file)
 
     if params['is_paired_end'] == "1":
@@ -115,7 +110,9 @@ def pe_functional_profiling_pipeline(params):
             sample_id + '_' + metric + '_functions_taxonomy.xlsx'
             ))
         if os.path.exists(sample_xlsx_report):
-            report_files[sample_xlsx_report] = sanitize_file_name(sample_id + ' function taxonomy profile long.xlsx')
+            report_files[sample_xlsx_report] = sanitize_file_name(
+                sample_id + ' function taxonomy profile long.xlsx'
+                )
         else:
             print('Sample XLSX file not found:', sample_xlsx_report)
 
@@ -138,7 +135,7 @@ def pe_functional_profiling_pipeline(params):
                 sanitize_file_name(sample_id + '_function_taxonomy_profile_chart.html')
             output['krona_charts'][krona_output + '.zip'] = \
                 (sanitize_file_name(sample_id + '_function_taxonomy_profile_chart.html'),
-                sample_id + ' function taxonomy chart')
+                    sample_id + ' function taxonomy chart')
         else:
             print('Krona diagram file not found:', krona_file)
 
@@ -236,7 +233,7 @@ def protein_functional_profiling_pipeline(params):
         for feature_id in feature_ids:
             if feature_id not in featureset_elements:
                 featureset_elements[feature_id] = []
-            featureset_elements[feature_id].append(params['name2ref'][sample_id]) # project.samples[sample_id].sample_name)
+            featureset_elements[feature_id].append(params['name2ref'][sample_id])
             featureset_element_ordering.append(feature_id)
 
         sample_xlsx_report = sanitize_file_name(os.path.join(
@@ -268,7 +265,7 @@ def protein_functional_profiling_pipeline(params):
                 sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html')
             output['krona_charts'][krona_output + '.zip'] = \
                 (sanitize_file_name(genome_name + '_function_taxonomy_profile_chart.html'),
-                sample_id + ' function taxonomy chart')
+                    sample_id + ' function taxonomy chart')
         else:
             print('Krona diagram file not found:', krona_file)
 
@@ -509,7 +506,8 @@ def get_dms(reference_id, ref_path, ws_name, ws_client):
     return dms_ref
 
 
-def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix, sample_id, genome_ref):
+def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix,
+                            sample_id, genome_ref):
 
     ret = ws_client.get_objects2({'objects': [{'ref': genome_ref}]})
     genome = ret['data'][0]['data']

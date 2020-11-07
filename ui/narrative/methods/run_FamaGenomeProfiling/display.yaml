@@ -65,7 +65,15 @@ description : |
         <li>Ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling.</li>
     </ul>
 
-    <p>Fama Profiling output includes report in HTML format, tables with results in Excel format and interactive plot.</p>
+    <p>Output of the Fama Genome Profiling app includes report in HTML format, interactive profile plot for each genome, a DomainAnnotation object for each genome, a FeatureSet object and link to zip archive with Excel spreadsheets and interactive plots.</p>
+    
+    <p>The HTML report contains the "Run Info" tab with a summary of results, "Protein list" tab with list of genes(proteins) and three tabs for each genome: "Functional profile", "Functional groups" and "Taxonomy profile". The "Functional profile" tab displays protein count and average amino acid identity % for each function. The "Functional groups" tab displays protein counts and average amino acid identity % for functions combined into more general functional groups. The "Taxonomy profile" tab displays protein counts for each function and each taxon.</p>
+
+    <p>Interactive Krona plots are generated for each genome. A Krona file contains taxonomic profiles displayed as hierarchical circular plots, one plot for each function. Numer of genes for each taxon is represented by an angle of the sector, and amino acid identity % is represented by color. Normally, all mapped genes would be mapped to the same taxon, but contaminated and chimeric genome assemblies can display conflicting taxonomic assignments of genes.</p>
+
+    <p>The DomainAnnotation objects are generated for each genome and contain list of genes with predicted functions. The Feature Set object contains list of predicted functional genes from all genomes. Those objects can be used for comparative genomics analyses (for example, GO term enrichment).</p>
+    
+    <p>The output zip archive contains Excel spreadsheets with combined functional profile for all genomes, combined function/taxonomy profiles for all genomes, and detailed function/taxonomy profile for each genome (reporting protein count and average AAI% for each taxon). In addition, the archive contains a text file with a list of genes with predicted functions and interactive Krona plots for all samples.</p>
     
     <p><strong> Additional resources</strong></p>
     <ul><li><a href="https://iseq.lbl.gov/fama/">More info about Fama</a></li>
@@ -86,3 +94,8 @@ publications :
         display-text: |
             Nayfach S, Pollard KS. Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biology. 2015;16: 51. doi: 10.1186/s13059-015-0611-7. Publication about third-party program used by Fama.
         link: https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/25853934/
+    -
+        pmid: 21961884
+        display-text: |
+            Ondov B, Bergman NH et al. Interactive metagenomic visualization in a Web browser. BMC Bioinformatics. 2011;12: 385. doi: 10.1186/1471-2105-12-385. Publication about third-party program used by Fama.
+        link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3190407/

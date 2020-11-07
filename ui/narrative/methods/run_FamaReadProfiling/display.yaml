@@ -58,21 +58,36 @@ description : |
     
     <p>Fama examines genetic potential of a microbial community and taxonomic composition of functional genes by direct mapping of individual sequence reads to a curated reference set of proteins. This tool has been developed for research projects focused on a specific metabolic process in microbial communities containing uncultured and phylogenetically distinct microbes with little similarity to known genomes. For such organisms, amino acid sequence comparisons have an advantage over nucleotide sequence comparison for characterization of genes.</p>
     
-    <p>Fama runs a similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p> 
+    <p>Fama runs a similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment. All input read libraries must be of the same type, i.e. either single read or paired-end libraries.</p> 
     
-    <p>For comparison between functions and between samples, raw read counts are normalized by library size, target gene size and predicted average genome size in the sample. For normalization by average genome size, Fama employs MicrobeCensus tool.</p>
-    
-    <p>Currently, three reference datasets are available in Fama Profiling:</p>
+    <p>Currently, three reference datasets are available in Fama Read Profiling:</p>
     <ul>
         <li>nitrogen cycle enzymes dataset for functional and taxonomic profiling of nitrate/nitrite/ammonia metabolic genes</li>
         <li>30 families of universal single-copy marker proteins from complete bacterial and archaeal genomes for taxonomic profiling</li>
         <li>ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling of uncultured organisms</li>
     </ul>
 
-    <p>For comparison between functions and between samples, raw read counts are normalized by library size, target gene size and predicted average genome size in the sample. For normalization by average genome size, Fama employs MicrobeCensus tool.</p>
-
-    <p>Fama Profiling output includes report in HTML format, tables with results in Excel format and interactive plot.</p>
+    <p>For comparison between functions and between samples, raw read counts are normalized by library size, target gene size and predicted average genome size in the sample. For normalization by average genome size, Fama employs MicrobeCensus tool. The normalization metric for single-read libraries is ERPKG (number of reads per kb of effective gene length per genome-equivalent):</p>
     
+    <p>ERPKG = (reads mapped to to gene) / (effective gene length in kb) / (genome equivalents),</p>
+    
+    <p>where effective gene length = (actual gene length) + (read length) - 2 * (minimal alignment length) + 1,<\br>
+    genome equivalents = (number of reads in library) / (average genome size)</p>
+    
+    <p>The normalization metric for paired-end read libraries is EFPKG(number of fragments per kb of effective gene length per genome-equivalent), which is calculated similarly to ERPKG, but with fragment count instead of read count, and some minor differences in calculation of effective gene length.</p>
+    
+    <p>If calculation normalized score is not possible (because of small number of reads etc.), only read counts and fragment counts are reported for single read and paired-end read libraries, respectively.</p>
+
+    <p>Output of the Fama Read Profiling app includes report in HTML format, interactive profile plot for each sample, filtered read library and link to zip archive with Excel spreadsheets and interactive plots.</p>
+    
+    <p>The HTML report contains the "Run Info" tab with a summary of results and three tabs for each read library: "Functional profile", "Functional groups" and "Taxonomy profile". The "Functional profile" tab displays normalized score, raw read count and average amino acid identity % for each function. The "Functional groups" tab displays normalized scores, raw read counts and average amino acid identity % for functions combined into more general functional groups. The "Taxonomy profile" tab displays normalized scores by function and by taxa.</p>
+
+    <p>Interactive Krona plots are generated for each sample. A Krona file contains taxonomic profiles displayed as hierarchical circular plots, one plot for each function. Score of each taxon is represented by an angle of the sector, and amino acid identity % is represented by color.</p>
+
+    <p>The filtered read library generated by the app contains reads from all libraries mapped to at least one function. This read library can be used for assembly of functional genes of interest, if small abundance of individual genomes or very large size of the library precludes conventional metagenome assembly.</p>
+    
+    <p>The output zip archive contains Excel spreadsheets with combined functional profile for all samples, combined function/taxonomy profiles for all samples, and detailed function/taxonomy profile for each sample (reporting normalized score, raw read count and average AAI% for each taxon). In addition, the archive contains interactive Krona plots for all samples.</p>
+        
     <p><strong> Additional resources</strong></p>
     <ul><li><a href="https://iseq.lbl.gov/fama/">More info about Fama</a></li>
     <li><a href="https://narrative.kbase.us/narrative/74172">Example narrative</a></li></ul>
@@ -92,3 +107,8 @@ publications :
         display-text: |
             Nayfach S, Pollard KS. Average genome size estimation improves comparative metagenomics and sheds light on the functional ecology of the human microbiome. Genome Biology. 2015;16: 51. doi: 10.1186/s13059-015-0611-7. Publication about third-party program used by Fama.
         link: https://www.ncbi.nlm.nih.gov/pmc/articles/pmid/25853934/
+    -
+        pmid: 21961884
+        display-text: |
+            Ondov B, Bergman NH et al. Interactive metagenomic visualization in a Web browser. BMC Bioinformatics. 2011;12: 385. doi: 10.1186/1471-2105-12-385. Publication about third-party program used by Fama.
+        link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3190407/
