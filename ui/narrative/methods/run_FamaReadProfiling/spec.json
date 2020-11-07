@@ -64,7 +64,7 @@
                     "display": "Paired End"
                 }, {
                     "value": 0,
-                    "display": "Single End"
+                    "display": "Single Read"
                 }]
             }            
         },

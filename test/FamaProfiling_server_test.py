@@ -108,17 +108,17 @@ class FamaProfilingTest(unittest.TestCase):
 
         ret = self.getImpl().run_FamaReadProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
-                                                                    'is_paired_end': 1,
+                                                                    'is_paired_end': 0,
 #                                                                    'read_library_ref': '22763/10/1',  # 4706 read set (LARGE!)
-#                                                                   'read_library_ref': '22763/20/1',  # 4701 2M susbset
+                                                                   'read_library_refs': ['22763/20/1'],  # 4701 2M susbset
 #                                                                    'read_library_ref': '22763/2/1',  # tiny read set (20 + 20 reads)
-                                                                    'read_library_refs': [self.pe_reads_ref['obj_ref'], '22763/2/1'], # tiny read set (20 + 20 reads), upload from local files
+#                                                                    'read_library_refs': [self.pe_reads_ref['obj_ref'], '22763/2/1'], # tiny read set (20 + 20 reads), upload from local files
                                                                     'output_read_library_name': 'Fama_pe_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
         
-#    @unittest.skip("")
+    @unittest.skip("")
     def test_se_fama_profiling(self):
         ret = self.getImpl().run_FamaReadProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
@@ -130,7 +130,7 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
         
-#    @unittest.skip("")
+    @unittest.skip("")
     def test_genome_fama_profiling(self):
         ret = self.getImpl().run_FamaGenomeProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
@@ -141,7 +141,7 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
 
-#    @unittest.skip("")
+    @unittest.skip("")
     def test_genomeset_fama_profiling(self):
         ret = self.getImpl().run_FamaGenomeProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',

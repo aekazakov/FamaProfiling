@@ -40,8 +40,10 @@ def pe_functional_profiling_pipeline(params):
 
     if params['is_paired_end'] == 1:
         project = fastq_pe_pipeline(project)
-    else:
+    elif params['is_paired_end'] == 0:
         project = fastq_se_pipeline(project)
+    else:
+        print('Wrong values of is_paired_end parameter', params['is_paired_end'])
 
     out_dir = os.path.join(work_dir, 'out')
     os.mkdir(out_dir)
