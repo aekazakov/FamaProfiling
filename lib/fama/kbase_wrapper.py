@@ -33,17 +33,17 @@ def pe_functional_profiling_pipeline(params):
     #~ input_paths = {}
     #~ input_paths[input_ref] = {}
     #~ input_paths[input_ref]['fwd_path'] = fastq_fwd
-    #~ if params['is_paired_end'] == 1:
+    #~ if params['is_paired_end'] == "1":
         #~ input_paths[input_ref]['rev_path'] = fastq_rev
     project_file = write_project_file(params['input_reads'], params['reference'], work_dir, params['is_paired_end'])
     project = Project(config_file=config_file, project_file=project_file)
 
-    if params['is_paired_end'] == 1:
+    if params['is_paired_end'] == "1":
         project = fastq_pe_pipeline(project)
-    elif params['is_paired_end'] == 0:
+    elif params['is_paired_end'] == "0":
         project = fastq_se_pipeline(project)
     else:
-        print('Wrong values of is_paired_end parameter', params['is_paired_end'])
+        raise ValueError('Wrong values of is_paired_end parameter', params['is_paired_end'])
 
     out_dir = os.path.join(work_dir, 'out')
     os.mkdir(out_dir)
@@ -53,7 +53,7 @@ def pe_functional_profiling_pipeline(params):
     out_fwd_fastq = os.path.join(work_dir, 'out_fwd.fastq')
 
     sample_id = project.list_samples()[0]
-    if params['is_paired_end'] == 1:
+    if params['is_paired_end'] == "1":
         out_rev_fastq = os.path.join(work_dir, 'out_rev.fastq')
     else:
         out_rev_fastq = ''
@@ -74,7 +74,7 @@ def pe_functional_profiling_pipeline(params):
 
     # TODO: Krona charts generate_functions_chart(parser_fwd)
     report_files = {}
-    if params['is_paired_end'] == 1:
+    if params['is_paired_end'] == "1":
         metric = 'efpkg'
         rawcount_flag = False
         for sample_id in project.list_samples():
@@ -354,7 +354,7 @@ background_db_size = 4769946
     return ret_val
 
 
-def write_project_file(input_paths, ref_dataset, work_dir, is_paired_end=0):
+def write_project_file(input_paths, ref_dataset, work_dir, is_paired_end="0"):
     ret_val = os.path.join(work_dir, 'project.ini')
 
     with open(ret_val, 'w') as of:
@@ -379,7 +379,7 @@ def write_project_file(input_paths, ref_dataset, work_dir, is_paired_end=0):
             of.write('\n\n[' + sanitize_sample_id(sample_id) + ']\nsample_id = ' +
                      sample_id + '\nfastq_pe1 = ')
             of.write(input_paths[sample_id]['fwd'])
-            if is_paired_end == 1:
+            if is_paired_end == "1":
                 of.write('\nfastq_pe2 = ')
                 of.write(input_paths[sample_id]['rev'])
             of.write('\nsample_dir = ')
