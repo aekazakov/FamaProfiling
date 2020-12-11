@@ -89,16 +89,17 @@ class FamaProfilingTest(unittest.TestCase):
                         'rev_file': os.path.join(cls.test_directory_path, 'test_fastq_pe2.fq'),
                         'sequencing_tech': 'Illumina',
                         'wsname': cls.ws_info[1],
+                        'single_genome': 0,
                         'name': 'Fama_test_pe_input',
-                        'interleaved': 'false'
+                        'interleaved': 0
                         }        
         cls.pe_reads_ref = ru.upload_reads(reads_params)
 
         se_reads_params = {'fwd_file': os.path.join(cls.test_directory_path, 'test_fastq_pe1.fq'),
                         'sequencing_tech': 'Illumina',
                         'wsname': cls.ws_info[1],
-                        'name': 'Fama_test_se_input',
-                        'interleaved': 0
+                        'single_genome': 0,
+                        'name': 'Fama_test_se_input'
                         }        
         cls.se_reads_ref = ru.upload_reads(se_reads_params)
 
@@ -124,7 +125,7 @@ class FamaProfilingTest(unittest.TestCase):
                                                                     'ref_dataset': 'nitrogen',
                                                                     'is_paired_end': "0",
 #                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
-                                                                    'read_library_refs': [self.se_reads_ref['obj_ref'], '22763/33/1'],
+                                                                    'read_library_refs': [self.se_reads_ref['obj_ref']],
                                                                     'output_read_library_name': 'Fama_se_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
