@@ -120,12 +120,14 @@ class FamaProfiling:
         
         # Write filtered reads to workspace
         reads_params = {'fwd_file': fama_output['fwd_reads'],
-                        'rev_file': fama_output['rev_reads'],
                         'sequencing_tech': reads[input_ref]['sequencing_tech'],
+                        'single_genome': 'false',
                         'wsname': params['workspace_name'],
                         'name': params['output_read_library_name'],
                         'interleaved': 'false'
                         }
+        if 'rev_reads' in fama_output:
+            reads_params['rev_file'] = fama_output['rev_reads']
 
         ru_ret = ru.upload_reads(reads_params)
         output_reads_ref = ru_ret['obj_ref']

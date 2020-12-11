@@ -56,7 +56,8 @@ def pe_functional_profiling_pipeline(params):
     # write filtered fastq
     write_filtered_fastq(out_fwd_fastq, out_rev_fastq, project)
     output['fwd_reads'] = out_fwd_fastq
-    output['rev_reads'] = out_rev_fastq
+    if params['is_paired_end'] == "1":
+        output['rev_reads'] = out_rev_fastq
 
     # Generate output
     out_report = os.path.join(out_dir, 'fama_report.html')

@@ -54,19 +54,14 @@ parameters :
             The app will create a subset of read sequences mapped to functional genes of interest. Choose a name for the output filtered read library.
 
 description : |
+    <p><strong>SUMMARY</strong></p>
+    
     <p>Functional profile captures genetic potential of microbial community for biological processes of interest, just like taxonomic profile captures microbial diversity. This app is based on the Fama computational tool for functional profiling of microbiomes and taxonomic profiling of functional genes.</p>
     
     <p>Fama examines genetic potential of a microbial community and taxonomic composition of functional genes by direct mapping of individual sequence reads to a curated reference set of proteins. This tool has been developed for research projects focused on a specific metabolic process in microbial communities containing uncultured and phylogenetically distinct microbes with little similarity to known genomes. For such organisms, amino acid sequence comparisons have an advantage over nucleotide sequence comparison for characterization of genes.</p>
     
-    <p>Fama runs a similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment. All input read libraries must be of the same type, i.e. either single read or paired-end libraries.</p> 
+    <p>Fama runs a similarity search for translated read sequences using fast aligner DIAMOND and customized databases of reference proteins. After the similarity search, all hits found by DIAMOND are filtered by AAI (amino acid identity %) with family-specific thresholds. Top hits that pass the filter are counted for functional and taxonomic assignment.</p>
     
-    <p>Currently, three reference datasets are available in Fama Read Profiling:</p>
-    <ul>
-        <li>nitrogen cycle enzymes dataset for functional and taxonomic profiling of nitrate/nitrite/ammonia metabolic genes</li>
-        <li>30 families of universal single-copy marker proteins from complete bacterial and archaeal genomes for taxonomic profiling</li>
-        <li>ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling of uncultured organisms</li>
-    </ul>
-
     <p>For comparison between functions and between samples, raw read counts are normalized by library size, target gene size and predicted average genome size in the sample. For normalization by average genome size, Fama employs MicrobeCensus tool. The normalization metric for single-read libraries is ERPKG (number of reads per kb of effective gene length per genome-equivalent):</p>
     
     <p>ERPKG = (reads mapped to to gene) / (effective gene length in kb) / (genome equivalents),</p>
@@ -77,13 +72,30 @@ description : |
     <p>The normalization metric for paired-end read libraries is EFPKG(number of fragments per kb of effective gene length per genome-equivalent), which is calculated similarly to ERPKG, but with fragment count instead of read count, and some minor differences in calculation of effective gene length.</p>
     
     <p>If calculation normalized score is not possible (because of small number of reads etc.), only read counts and fragment counts are reported for single read and paired-end read libraries, respectively.</p>
-
+    
+    <p><strong>INPUT</strong></p>
+    
+    <p>Read Profiling requires unassembled short reads as an input. Multiple read libraries can be analyzed in a single run. For better results, adapters should be trimmed and low-quality sequences should be filtered out. All input read libraries must be of the same type, i.e. either single read or paired-end libraries.</p> 
+    
+    <p><strong>REFERENCE DATA</strong></p>
+    
+    <p>Datasets of reference proteins were prepared by search for functional roles of interest in the SEED database, with additional consistency checks. Those checks include identification and removal of incomplete proteins and redundant sequences. So, reference datasets include proteins from SEED genomes, with exception of RP-L6 dataset, which contains proteins from metagenome-assembled genomes. A complete list of functional families can be found <a href="https://iseq.lbl.gov/fama/">here.</a></p>
+    
+    <p>Reference data v.1.4 includes three reference datasets:</p>
+    <ul>
+        <li>nitrogen cycle enzymes dataset for functional and taxonomic profiling of nitrate/nitrite/ammonia metabolic genes</li>
+        <li>30 families of universal single-copy marker proteins from complete bacterial and archaeal genomes for taxonomic profiling</li>
+        <li>ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling of uncultured organisms</li>
+    </ul>
+    
+    <p><strong>OUTPUT</strong></p>
+    
     <p>Output of the Fama Read Profiling app includes report in HTML format, interactive profile plot for each sample, filtered read library and link to zip archive with Excel spreadsheets and interactive plots.</p>
     
     <p>The HTML report contains the "Run Info" tab with a summary of results and three tabs for each read library: "Functional profile", "Functional groups" and "Taxonomy profile". The "Functional profile" tab displays normalized score, raw read count and average amino acid identity % for each function. The "Functional groups" tab displays normalized scores, raw read counts and average amino acid identity % for functions combined into more general functional groups. The "Taxonomy profile" tab displays normalized scores by function and by taxa.</p>
-
+    
     <p>Interactive Krona plots are generated for each sample. A Krona file contains taxonomic profiles displayed as hierarchical circular plots, one plot for each function. Score of each taxon is represented by an angle of the sector, and amino acid identity % is represented by color.</p>
-
+    
     <p>The filtered read library generated by the app contains reads from all libraries mapped to at least one function. This read library can be used for assembly of functional genes of interest, if small abundance of individual genomes or very large size of the library precludes conventional metagenome assembly.</p>
     
     <p>The output zip archive contains Excel spreadsheets with combined functional profile for all samples, combined function/taxonomy profiles for all samples, and detailed function/taxonomy profile for each sample (reporting normalized score, raw read count and average AAI% for each taxon). In addition, the archive contains interactive Krona plots for all samples.</p>
