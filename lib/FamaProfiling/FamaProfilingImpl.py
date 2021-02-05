@@ -110,9 +110,10 @@ class FamaProfiling:
                        'work_dir': self.shared_folder,
                        'reference': fama_reference,
                        'is_paired_end' : params['is_paired_end'],
-                       'name2ref' : name2ref
-                       #~ 'ws_name': params['workspace_name'],
-                       #~ 'ws_client': ws_client
+                       'name2ref' : name2ref,
+                       'ws_name': params['workspace_name'],
+                       'ws_client': ws_client,
+                       'output_read_library_name': params['output_read_library_name']
                        }
 
         # Run Fama
@@ -168,7 +169,9 @@ class FamaProfiling:
 
         # Save report
         report_params = {'message': message,
-                         'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'}],
+                         'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'},
+                                            {'ref': fama_output['trait_matrix_ref'], 'description': 'Raw counts matrix'},
+                                            {'ref': fama_output['functional_profile_ref'], 'description': 'Functional profile'}],
                          'direct_html_link_index': 0,
                          'html_links': html_links,
                          'file_links': fama_output['report_files'],

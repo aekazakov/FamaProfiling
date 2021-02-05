@@ -12,6 +12,7 @@ from fama.project.project import Project
 from fama.pe_functional_pipeline import fastq_pe_pipeline
 from fama.se_functional_pipeline import fastq_pipeline as fastq_se_pipeline
 from fama.protein_functional_pipeline import protein_pipeline
+from fama.output.report import get_function_scores
 from fama.kbase_report import generate_html_report, generate_protein_html_report
 
 # How can I get reference data path from the server?
@@ -86,7 +87,11 @@ def pe_functional_profiling_pipeline(params):
                 rawcount_flag = True
         if rawcount_flag:
             metric = 'readcount'
-
+    
+    # Create TraitMatrix object
+    output['trait_matrix_ref'] = write_trait_matrix(project, params)
+    output['functional_profile_ref'] = write_functional_profile(project, params, output['trait_matrix_ref'])
+    
     report_files[out_report] = 'fama_report.html'
     project_xlsx_report = sanitize_file_name(os.path.join(
         project.options.work_dir,
@@ -593,6 +598,141 @@ def save_domain_annotations(project, dms_ref, ws_name, ws_client, name_prefix,
     result = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
     return result, feature_ids, genome_name
 
+
+def get_ref_attributemapping(project, params):
+    """Creates AttributeMapping objects for reference library"""
+    ws_client = params['ws_client']
+    row_attributemapping_ref = None
+    try:
+        ams = ws_client.list_objects({'type': 'KBaseExperiments.AttributeMapping', 'workspaces': [params['ws_name']]})
+        for obj_data in ams:
+            if obj_data[1] == ref_model_set_names[params['reference']] + '_mapping':
+                row_attributemapping_ref = "{}/{}/{}".format(obj_data[6], obj_data[0], obj_data[4])
+                break
+    except ServerError as wse:
+        print('Logging exception searching for domain module set')
+        print(str(wse))
+
+    if row_attributemapping_ref is None:
+        attributes = []
+        attributes.append({'attribute':'name', 'source':'Fama'})
+        attributes.append({'attribute':'description', 'source':'Fama'})
+        attributes.append({'attribute':'category', 'source':'Fama'})
+        instances = {}
+        with open(project.config.get_functions_file(project.collection), 'r') as infile:
+            for line in infile:
+                row = line.rstrip('\n\r').split('\t')
+                instances[row[0]] = [row[0], row[1], row[2]]
+        row_attributemapping = {'instances':instances ,'attributes':attributes, 'ontology_mapping_method':'User curation'}
+    
+        ret = ws_client.save_objects({'workspace': params['ws_name'],
+                                      'objects': [{'name': ref_model_set_names[params['reference']] + '_mapping',
+                                                   'type': 'KBaseExperiments.AttributeMapping',
+                                                   'data': row_attributemapping}]})
+        print(str(ret))
+        row_attributemapping_ref = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
+    return row_attributemapping_ref
+
+        
+def write_trait_matrix(project, params):
+    """Creates TraitMatrix object"""
+    ws_client = params['ws_client']
+    matrix_data = {}
+
+    if params['is_paired_end'] == "1":
+        metric = 'fragmentcount'
+    else:
+        metric = 'readcount'
+    scores = get_function_scores(project, metric=metric)
+    
+    values = []
+    row_ids = []
+    col_ids = []
+    for sample_id in project.list_samples():
+        col_ids.append(sample_id)
+    for function_id in sorted(scores.keys()):
+        row_ids.append(function_id)
+        row_values = []
+        for sample_id in project.list_samples():
+            if metric in scores[function_id][sample_id]:
+                row_values.append(float(scores[function_id][sample_id][metric]))
+            else:
+                row_values.append(0.0)
+        values.append(row_values)
+    data = {'row_ids':row_ids, 'col_ids':col_ids, 'values':values}
+    # Create AttributeMapping for columns
+    attributes = []
+    attributes.append({'attribute':'sample_id', 'source':'KBase'})
+    instances = {}
+    for sample_id in project.list_samples():
+        instances[sample_id] = [sample_id]
+    col_attributemapping = {'instances':instances ,'attributes':attributes, 'ontology_mapping_method':'User curation'}
+    ret = ws_client.save_objects({'workspace': params['ws_name'],
+                                  'objects': [{'name': params['output_read_library_name'] + '_project',
+                                               'type': 'KBaseExperiments.AttributeMapping',
+                                               'data': col_attributemapping}]})
+    print(str(ret))
+    col_attributemapping_ref = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
+
+    # find AttributeMapping for rows or create it
+    row_attributemapping_ref = get_ref_attributemapping(project, params)
+    
+    trait_matrix = {'scale':'raw', 'data':data, 'col_attributemapping_ref': col_attributemapping_ref, 'row_attributemapping_ref':row_attributemapping_ref}
+    
+    ret = ws_client.save_objects({'workspace': params['ws_name'],
+                                  'objects': [{'name': params['output_read_library_name'] + '_rawmatrix',
+                                               'type': 'KBaseMatrices.TraitMatrix',
+                                               'data': trait_matrix}]})
+    print(str(ret))
+    tm_id = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
+    return tm_id
+
+    
+def write_functional_profile(project, params, base_obj_ref):
+    """Creates FunctinalProfile object"""
+    ws_client = params['ws_client']
+    if params['is_paired_end'] == "1":
+        metric = 'efpkg'
+        rawcount_flag = False
+        for sample_id in project.list_samples():
+            if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                rawcount_flag = True
+        if rawcount_flag:
+            metric = 'fragmentcount'
+    else:
+        metric = 'erpkg'
+        rawcount_flag = False
+        for sample_id in project.list_samples():
+            if project.samples[sample_id].rpkg_scaling_factor == 0.0:
+                rawcount_flag = True
+        if rawcount_flag:
+            metric = 'readcount'
+    scores = get_function_scores(project, metric=metric)
+    
+    values = []
+    row_ids = []
+    col_ids = []
+    for sample_id in project.list_samples():
+        col_ids.append(sample_id)
+    for function_id in sorted(scores.keys()):
+        row_ids.append(function_id)
+        row_values = []
+        for sample_id in project.list_samples():
+            if metric in scores[function_id][sample_id]:
+                row_values.append(float(scores[function_id][sample_id][metric]))
+            else:
+                row_values.append(0.0)
+        values.append(row_values)
+    data = {'row_ids':row_ids, 'col_ids':col_ids, 'values':values}
+
+    functional_profile = {'base_object_ref':base_obj_ref, 'data':data, 'profile_type':'sequence reads', 'profile_category':'community'}
+    ret = ws_client.save_objects({'workspace': params['ws_name'],
+                                  'objects': [{'name': params['output_read_library_name'] + '_profile',
+                                               'type': 'KBaseProfile.FunctionalProfile',
+                                               'data': functional_profile}]})
+    print(str(ret))
+    fp_ref = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
+    return fp_ref
 
 def sanitize_sample_id(sample_id):
     """Replaces slashes with underscores, so KBase refs could be used as sample IDs"""
