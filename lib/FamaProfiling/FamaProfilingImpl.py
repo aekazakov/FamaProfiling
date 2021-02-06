@@ -113,7 +113,8 @@ class FamaProfiling:
                        'name2ref' : name2ref,
                        'ws_name': params['workspace_name'],
                        'ws_client': ws_client,
-                       'output_read_library_name': params['output_read_library_name']
+                       'output_read_library_name': params['output_read_library_name'],
+                       'input_read_refs': params['read_library_refs']
                        }
 
         # Run Fama

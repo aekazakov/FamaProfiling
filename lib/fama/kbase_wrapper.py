@@ -670,7 +670,8 @@ def write_trait_matrix(project, params):
     ret = ws_client.save_objects({'workspace': params['ws_name'],
                                   'objects': [{'name': params['output_read_library_name'] + '_project',
                                                'type': 'KBaseExperiments.AttributeMapping',
-                                               'data': col_attributemapping}]})
+                                               'data': col_attributemapping,
+                                               'provenance': [{'input_ws_objects':params['input_read_refs']}]}]})
     print(str(ret))
     col_attributemapping_ref = "{}/{}/{}".format(ret[0][6], ret[0][0], ret[0][4])
 
