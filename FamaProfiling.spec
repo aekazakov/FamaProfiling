@@ -17,6 +17,7 @@ module FamaProfiling {
         read_library_refs - references to the name of the PE read library or SE read library
         ref_dataset - the name of Fama reference dataset
         is_paired_end - 1 for paired-end library, 0 for single-end library
+		output_functional_profile_name - the name of the output functional profile
         output_read_library_ref - the name of the output filtered PE or SE read library
 
     */
@@ -25,6 +26,7 @@ module FamaProfiling {
         list<string> read_library_refs;
         string ref_dataset;
         bool is_paired_end;
+		string output_functional_profile_name;
         string output_read_library_name;
     } FamaReadProfilingParams;
 

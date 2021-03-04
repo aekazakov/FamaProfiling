@@ -52,6 +52,13 @@ parameters :
             Enter a name for the filtered read library
         long-hint : |
             The app will create a subset of read sequences mapped to functional genes of interest. Choose a name for the output filtered read library.
+    output_functional_profile_name:
+        ui-name : |
+            Output Functional Profile
+        short-hint : |
+            Enter a name for the functional profile
+        long-hint : |
+            The app will create a functional profile for the set of functions defined in the selected reference dataset. Choose a name for the output functional profile.
 
 description : |
     <p><strong>SUMMARY</strong></p>

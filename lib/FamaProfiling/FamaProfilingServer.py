@@ -17,7 +17,7 @@ from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError, \
 from jsonrpcbase import ServerError as JSONServerError
 
 from biokbase import log
-from authclient import KBaseAuth as _KBaseAuth
+from FamaProfiling.authclient import KBaseAuth as _KBaseAuth
 
 try:
     from ConfigParser import ConfigParser
@@ -51,7 +51,7 @@ def get_config():
 
 config = get_config()
 
-from FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
+from FamaProfiling.FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
 impl_FamaProfiling = FamaProfiling(config)
 
 

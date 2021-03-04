@@ -33,7 +33,7 @@ class FamaProfiling:
     ######################################### noqa
     VERSION = "1.0.1"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
-    GIT_COMMIT_HASH = "e01fe981b1c379712454d29e8d4a03c88f57da9e"
+    GIT_COMMIT_HASH = "5f998bccca606cecc8479c53ad3a055dcd1336c4"
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
@@ -60,11 +60,13 @@ class FamaProfiling:
            the name of the PE read library or SE read library ref_dataset -
            the name of Fama reference dataset is_paired_end - 1 for
            paired-end library, 0 for single-end library
-           output_read_library_ref - the name of the output filtered PE or SE
-           read library) -> structure: parameter "workspace_name" of String,
-           parameter "read_library_refs" of list of String, parameter
+           output_functional_profile_name - the name of the output functional
+           profile output_read_library_ref - the name of the output filtered
+           PE or SE read library) -> structure: parameter "workspace_name" of
+           String, parameter "read_library_refs" of list of String, parameter
            "ref_dataset" of String, parameter "is_paired_end" of type "bool"
            (A boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "output_functional_profile_name" of String, parameter
            "output_read_library_name" of String
         :returns: instance of type "ReportResults" (Output report parameters
            report_name - the name of the report object report_ref - the
@@ -78,33 +80,31 @@ class FamaProfiling:
         input_refs = params['read_library_refs']
         fama_reference = params['ref_dataset']
         ws_client = Workspace(self.ws_url)
+        ru = ReadsUtils(self.callback_url)
         ret = ws_client.get_object_info3({'objects': [{'ref': ref} for ref in input_refs]})
         name2ref = {}
+        input_reads = {}
         for input_ref in input_refs:
             ret = ws_client.get_object_info3({'objects': [{'ref': input_ref}]})
             obj_name = ret['infos'][0][1]
             name2ref[obj_name] = input_ref
             
-        reads_params = {'read_libraries': input_refs,
-                        'interleaved': 'false',
-                        'gzipped': None
-                        }
-        input_reads = {}
+            reads_params = {'read_libraries': [input_ref],
+                            'interleaved': 'false',
+                            'gzipped': None
+                            }
 
-        ru = ReadsUtils(self.callback_url)
-        reads = ru.download_reads(reads_params)['files']
+            reads = ru.download_reads(reads_params)['files']
 
-        print('Input reads files:')
-        print(reads)
-        for input_name in name2ref:
-            input_ref = name2ref[input_name]
+            print('Input reads files downloaded:')
+            print(reads)
             fwd_reads_file = reads[input_ref]['files']['fwd']
             rev_reads_file = reads[input_ref]['files']['rev']
             print('forward: ' + str(fwd_reads_file))
             print('reverse: ' + str(rev_reads_file))
-            input_reads[input_name] = {}
-            input_reads[input_name]['fwd'] = fwd_reads_file
-            input_reads[input_name]['rev'] = rev_reads_file
+            input_reads[obj_name] = {}
+            input_reads[obj_name]['fwd'] = fwd_reads_file
+            input_reads[obj_name]['rev'] = rev_reads_file
 
         fama_params = {'input_reads': input_reads,
                        'work_dir': self.shared_folder,
@@ -114,6 +114,7 @@ class FamaProfiling:
                        'ws_name': params['workspace_name'],
                        'ws_client': ws_client,
                        'output_read_library_name': params['output_read_library_name'],
+                       'output_functional_profile_name': params['output_functional_profile_name'],
                        'input_read_refs': params['read_library_refs']
                        }
 

@@ -79,6 +79,18 @@
                 "valid_ws_types" : ["KBaseFile.SingleEndLibrary", "KBaseFile.PairedEndLibrary"],
                 "is_output_name":true
             }
+        },
+        {
+            "id" : "output_functional_profile_name",
+            "optional" : false,
+            "advanced" : false,
+            "allow_multiple" : false,
+            "default_values" : [ "Fama.functional.profile" ],
+            "field_type" : "text",
+            "text_options" : {
+                "valid_ws_types" : ["KBaseProfile.FunctionalProfile"],
+                "is_output_name":true
+            }
         }
     ],
     "behavior": {
@@ -103,6 +115,10 @@
                 {
                     "input_parameter": "is_paired_end",
                     "target_property": "is_paired_end"
+                },
+                {
+                    "input_parameter": "output_functional_profile_name",
+                    "target_property": "output_functional_profile_name"
                 },
                 {
                     "input_parameter": "output_read_library_name",

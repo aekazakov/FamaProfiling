@@ -668,7 +668,7 @@ def write_trait_matrix(project, params):
         instances[sample_id] = [sample_id]
     col_attributemapping = {'instances':instances ,'attributes':attributes, 'ontology_mapping_method':'User curation'}
     ret = ws_client.save_objects({'workspace': params['ws_name'],
-                                  'objects': [{'name': params['output_read_library_name'] + '_project',
+                                  'objects': [{'name': params['output_functional_profile_name'] + '.rawmatrix',
                                                'type': 'KBaseExperiments.AttributeMapping',
                                                'data': col_attributemapping,
                                                'provenance': [{'input_ws_objects':params['input_read_refs']}]}]})
@@ -728,7 +728,7 @@ def write_functional_profile(project, params, base_obj_ref):
 
     functional_profile = {'base_object_ref':base_obj_ref, 'data':data, 'profile_type':'sequence reads', 'profile_category':'community'}
     ret = ws_client.save_objects({'workspace': params['ws_name'],
-                                  'objects': [{'name': params['output_read_library_name'] + '_profile',
+                                  'objects': [{'name': params['output_functional_profile_name'],
                                                'type': 'KBaseProfile.FunctionalProfile',
                                                'data': functional_profile}]})
     print(str(ret))

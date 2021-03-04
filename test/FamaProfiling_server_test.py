@@ -112,18 +112,20 @@ class FamaProfilingTest(unittest.TestCase):
                                                                     'is_paired_end': "1",
 #                                                                    'read_library_refs': ['22763/20/1'],  # 4701 2M susbset
                                                                     'read_library_refs': [self.pe_reads_ref['obj_ref'], '22763/2/1'], # tiny read set (20 + 20 reads), upload from local files
+                                                                    'output_functional_profile_name': 'Fama_test_func_profile',
                                                                     'output_read_library_name': 'Fama_pe_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
         
-    @unittest.skip("")
+#    @unittest.skip("")
     def test_se_fama_profiling(self):
         ret = self.getImpl().run_FamaReadProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
                                                                     'is_paired_end': "0",
 #                                                                    'read_library_ref': '22763/33/1',  # tiny read set (20 reads)
                                                                     'read_library_refs': [self.se_reads_ref['obj_ref']],
+                                                                    'output_functional_profile_name': 'Fama_test_func_profile',
                                                                     'output_read_library_name': 'Fama_se_test_output'})
         print ('Report name', ret[0]['report_name'])
         print ('Report reference', ret[0]['report_ref'])
