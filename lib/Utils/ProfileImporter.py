@@ -99,7 +99,6 @@ class ProfileImporter:
         tab_def_content += '''\n<div class="tab">\n'''
         tab_def_content += '''\n<button class="tablinks" '''
         tab_def_content += '''onclick="openTab(event, '{}')"'''.format(viewer_name)
-        tab_def_content += ''' id="defaultOpen"'''
         tab_def_content += '''>Profile Statistics</button>\n'''
 
         tab_content += '''\n<div id="{}" class="tabcontent" style="overflow:auto">'''.format(viewer_name)
@@ -120,6 +119,7 @@ class ProfileImporter:
         viewer_name = 'ProfileHeatmapViewer'
         tab_def_content += '''\n<button class="tablinks" '''
         tab_def_content += '''onclick="openTab(event, '{}')"'''.format(viewer_name)
+        tab_def_content += ''' id="defaultOpen"'''
         tab_def_content += '''>Profile Heatmap</button>\n'''
 
         heatmap_report_files = os.listdir(heatmap_dir)
@@ -206,10 +206,8 @@ class ProfileImporter:
     def __init__(self, config):
         self.callback_url = config['SDK_CALLBACK_URL']
         self.scratch = config['scratch']
-        #self.token = config['KB_AUTH_TOKEN']
+        # self.token = config['KB_AUTH_TOKEN']
         self.dfu = DataFileUtil(self.callback_url)
         self.report_util = kb_GenericsReport(self.callback_url)
-
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
-
