@@ -7,12 +7,15 @@ from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.WorkspaceClient import Workspace
+from installed_clients.kb_GenericsReportClient import kb_GenericsReport
 
 from installed_clients.baseclient import ServerError 
 from fama.kbase_wrapper import genome_proteins_to_fasta
 from fama.kbase_wrapper import pe_functional_profiling_pipeline as functional_profiling_pipeline
 from fama.kbase_wrapper import protein_functional_profiling_pipeline
 from fama.kbase_wrapper import save_domain_annotations
+from Utils.ProfileImporter import ProfileImporter
+
 #END_HEADER
 
 
@@ -31,9 +34,9 @@ class FamaProfiling:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.1"
+    VERSION = "1.0.2"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
-    GIT_COMMIT_HASH = "5f998bccca606cecc8479c53ad3a055dcd1336c4"
+    GIT_COMMIT_HASH = "7a76b943e8a0c9ae1b7434f42da807034e9fe0db"
 
     #BEGIN_CLASS_HEADER
     def log(self, message, prefix_newline=False):
@@ -366,6 +369,36 @@ class FamaProfiling:
         # At some point might do deeper type checking...
         if not isinstance(output, dict):
             raise ValueError('Method run_FamaGenomeProfiling return value ' +
+                             'output is not type dict as required.')
+        # return the results
+        return [output]
+
+    def view_FamaFunctionalProfile(self, ctx, params):
+        """
+        View Fama Functional Profile
+        :param params: instance of type "ViewFunctionalProfileParams"
+           (Parameters for functional profile viewer. func_profile_ref -
+           reference to functional profile workspace_name - the name of the
+           workspace for input/output) -> structure: parameter
+           "func_profile_ref" of String, parameter "workspace_name" of String
+        :returns: instance of type "ReportResults" (Output report parameters
+           report_name - the name of the report object report_ref - the
+           reference to the report object) -> structure: parameter
+           "report_name" of String, parameter "report_ref" of String
+        """
+        # ctx is the context object
+        # return variables are: output
+        #BEGIN view_FamaFunctionalProfile
+        config = {'SDK_CALLBACK_URL':self.callback_url,
+                  'scratch':self.shared_folder
+                  }
+        importer = ProfileImporter(config)
+        output = importer.gen_func_profile_report(params['func_profile_ref'], params['workspace_name'])
+        #END view_FamaFunctionalProfile
+
+        # At some point might do deeper type checking...
+        if not isinstance(output, dict):
+            raise ValueError('Method view_FamaFunctionalProfile return value ' +
                              'output is not type dict as required.')
         # return the results
         return [output]

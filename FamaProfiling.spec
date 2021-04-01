@@ -47,6 +47,18 @@ module FamaProfiling {
         string output_annotation_name;
     } FamaGenomeProfilingParams;
 
+    /*
+    Parameters for functional profile viewer.
+
+	func_profile_ref - reference to functional profile
+    workspace_name - the name of the workspace for input/output
+
+    */
+    typedef structure {
+		string func_profile_ref;
+        string workspace_name;
+    } ViewFunctionalProfileParams;
+
     /* 
     Output report parameters
 
@@ -72,6 +84,6 @@ module FamaProfiling {
     /*
 		View Fama Functional Profile
     */
-    funcdef view_FamaFunctionalProfile(string func_profile_ref) returns (ReportResults output) authentication required;
+    funcdef view_FamaFunctionalProfile(ViewFunctionalProfileParams params) returns (ReportResults output) authentication required;
 
 };

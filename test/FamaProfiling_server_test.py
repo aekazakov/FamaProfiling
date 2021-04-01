@@ -104,7 +104,7 @@ class FamaProfilingTest(unittest.TestCase):
         cls.se_reads_ref = ru.upload_reads(se_reads_params)
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-#    @unittest.skip("")
+    @unittest.skip("")
     def test_pe_fama_profiling(self):
 
         ret = self.getImpl().run_FamaReadProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
@@ -118,7 +118,7 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
         
-#    @unittest.skip("")
+    @unittest.skip("")
     def test_se_fama_profiling(self):
         ret = self.getImpl().run_FamaReadProfiling(self.getContext(), {'workspace_name': self.ws_info[1],
                                                                     'ref_dataset': 'nitrogen',
@@ -153,4 +153,11 @@ class FamaProfilingTest(unittest.TestCase):
         print ('Report reference', ret[0]['report_ref'])
         print(ret)
 
+    #@unittest.skip("")
+    def test_view_functional_profile(self):
+        ret = self.getImpl().view_FamaFunctionalProfile(self.getContext(), {'workspace_name': self.ws_info[1],
+                                                                    'func_profile_ref': '22763/77/1'})
+        print ('Report name', ret[0]['report_name'])
+        print ('Report reference', ret[0]['report_ref'])
+        print(ret)
         

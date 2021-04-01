@@ -17,7 +17,7 @@ from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError, \
 from jsonrpcbase import ServerError as JSONServerError
 
 from biokbase import log
-from FamaProfiling.authclient import KBaseAuth as _KBaseAuth
+from authclient import KBaseAuth as _KBaseAuth
 
 try:
     from ConfigParser import ConfigParser
@@ -51,7 +51,7 @@ def get_config():
 
 config = get_config()
 
-from FamaProfiling.FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
+from FamaProfilingImpl import FamaProfiling  # noqa @IgnorePep8
 impl_FamaProfiling = FamaProfiling(config)
 
 
@@ -346,6 +346,10 @@ class Application(object):
                              name='FamaProfiling.run_FamaGenomeProfiling',
                              types=[dict])
         self.method_authentication['FamaProfiling.run_FamaGenomeProfiling'] = 'required'  # noqa
+        self.rpc_service.add(impl_FamaProfiling.view_FamaFunctionalProfile,
+                             name='FamaProfiling.view_FamaFunctionalProfile',
+                             types=[dict])
+        self.method_authentication['FamaProfiling.view_FamaFunctionalProfile'] = 'required'  # noqa
         self.rpc_service.add(impl_FamaProfiling.status,
                              name='FamaProfiling.status',
                              types=[dict])
