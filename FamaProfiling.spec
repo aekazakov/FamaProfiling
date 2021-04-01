@@ -69,4 +69,9 @@ module FamaProfiling {
     */
     funcdef run_FamaGenomeProfiling(FamaGenomeProfilingParams params) returns (ReportResults output) authentication required;
 
+    /*
+		View Fama Functional Profile
+    */
+    funcdef view_FamaFunctionalProfile(string func_profile_ref) returns (ReportResults output) authentication required;
+
 };
