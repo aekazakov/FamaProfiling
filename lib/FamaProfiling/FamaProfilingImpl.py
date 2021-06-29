@@ -34,7 +34,7 @@ class FamaProfiling:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.2"
+    VERSION = "1.1.0"
     GIT_URL = "https://github.com/aekazakov/FamaProfiling.git"
     GIT_COMMIT_HASH = "7a76b943e8a0c9ae1b7434f42da807034e9fe0db"
 

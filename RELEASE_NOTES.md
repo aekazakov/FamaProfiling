@@ -65,3 +65,8 @@
 * Added Fama version 1.0 to app names
 * Added refdata version number to reference dataset names in dropdown lists 
 * Added support for input GenomeSet in Read Fama Genome Profiling
+
+1.1.0
+----
+* Added View Fama Functional Profile app
+* Added FunctionalProfile output to Run Fama Read Profiling 
