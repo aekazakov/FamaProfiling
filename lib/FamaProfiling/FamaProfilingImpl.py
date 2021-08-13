@@ -7,13 +7,11 @@ from installed_clients.ReadsUtilsClient import ReadsUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.WorkspaceClient import Workspace
-from installed_clients.kb_GenericsReportClient import kb_GenericsReport
 
-from installed_clients.baseclient import ServerError 
+from installed_clients.baseclient import ServerError
 from fama.kbase_wrapper import genome_proteins_to_fasta
 from fama.kbase_wrapper import pe_functional_profiling_pipeline as functional_profiling_pipeline
 from fama.kbase_wrapper import protein_functional_profiling_pipeline
-from fama.kbase_wrapper import save_domain_annotations
 from Utils.ProfileImporter import ProfileImporter
 
 #END_HEADER
@@ -53,7 +51,6 @@ class FamaProfiling:
         #END_CONSTRUCTOR
         pass
 
-
     def run_FamaReadProfiling(self, ctx, params):
         """
         Run metagenome functional profiling module of Fama.
@@ -91,7 +88,7 @@ class FamaProfiling:
             ret = ws_client.get_object_info3({'objects': [{'ref': input_ref}]})
             obj_name = ret['infos'][0][1]
             name2ref[obj_name] = input_ref
-            
+
             reads_params = {'read_libraries': [input_ref],
                             'interleaved': 'false',
                             'gzipped': None
@@ -112,8 +109,8 @@ class FamaProfiling:
         fama_params = {'input_reads': input_reads,
                        'work_dir': self.shared_folder,
                        'reference': fama_reference,
-                       'is_paired_end' : params['is_paired_end'],
-                       'name2ref' : name2ref,
+                       'is_paired_end': params['is_paired_end'],
+                       'name2ref': name2ref,
                        'ws_name': params['workspace_name'],
                        'ws_client': ws_client,
                        'output_read_library_name': params['output_read_library_name'],
@@ -123,7 +120,7 @@ class FamaProfiling:
 
         # Run Fama
         fama_output = functional_profiling_pipeline(fama_params)
-        
+
         # Write filtered reads to workspace
         reads_params = {'fwd_file': fama_output['fwd_reads'],
                         'sequencing_tech': reads[input_ref]['sequencing_tech'],
@@ -142,7 +139,6 @@ class FamaProfiling:
 
         # Write HTML output to workspace
         message = 'Fama functional profiling finished successfully'
-        
         dfu = DataFileUtil(self.callback_url)
         try:
             dfu_output = dfu.file_to_shock({'file_path': fama_output['html_report']})
@@ -174,9 +170,12 @@ class FamaProfiling:
 
         # Save report
         report_params = {'message': message,
-                         'objects_created':[{'ref': output_reads_ref, 'description': 'Filtered Read Library'},
-                                            {'ref': fama_output['trait_matrix_ref'], 'description': 'Raw counts matrix'},
-                                            {'ref': fama_output['functional_profile_ref'], 'description': 'Functional profile'}],
+                         'objects_created': [{'ref': output_reads_ref,
+                                              'description': 'Filtered Read Library'},
+                                             {'ref': fama_output['trait_matrix_ref'],
+                                              'description': 'Raw counts matrix'},
+                                             {'ref': fama_output['functional_profile_ref'],
+                                              'description': 'Functional profile'}],
                          'direct_html_link_index': 0,
                          'html_links': html_links,
                          'file_links': fama_output['report_files'],
@@ -251,7 +250,8 @@ class FamaProfiling:
                     genome_data = ret['data']
                     genome_name = ret['info'][1]
                     if genome_name in name2ref:
-                        raise ServerError('All input genome names must be unique. Check ' + genome_name)
+                        raise ServerError('All input genome names must be unique. Check '
+                                          + genome_name)
                     name2ref[genome_name] = sub_obj_ref
                     proteins = genome_proteins_to_fasta(genome_data, self.shared_folder)
                     input_proteins[genome_name] = {}
@@ -264,7 +264,8 @@ class FamaProfiling:
                 input_proteins[obj_name] = {}
                 input_proteins[obj_name]['fwd'] = proteins
             else:
-                raise ServerError('Incompatible object: ' + input_genome_ref + ' (' + obj_name + ')')
+                raise ServerError('Incompatible object: ' + input_genome_ref
+                                  + ' (' + obj_name + ')')
 
         self.log('Input sequence files:', str(input_proteins))
         self.log('reference: ', fama_reference)
@@ -299,13 +300,14 @@ class FamaProfiling:
             self.log(str(dfue))
             raise
         feature_set_obj_ref = "{}/{}/{}".format(dfu_oi[6], dfu_oi[0], dfu_oi[4])
-        objects_created.append({'ref': feature_set_obj_ref, 'description': 'Filtered genome features'})
+        objects_created.append({'ref': feature_set_obj_ref,
+                                'description': 'Filtered genome features'})
 
         self.log('FeatureSet saved to ' + feature_set_obj_ref)
-        
+
         # Write HTML output to workspace
         message = 'Fama protein functional profiling finished successfully'
-        
+
         try:
             dfu_output = dfu.file_to_shock({'file_path': fama_output['html_report']})
         except ServerError as dfue:
@@ -314,7 +316,6 @@ class FamaProfiling:
             self.log(str(dfue))
             raise
         self.log('HTML report saved: ' + str(dfu_output))
-
 
         html_links = [{'shock_id': dfu_output['shock_id'],
                        'description': 'HTML report for Fama App',
@@ -339,7 +340,7 @@ class FamaProfiling:
 
         # Save report
         report_params = {'message': message,
-                         'objects_created':objects_created,
+                         'objects_created': objects_created,
                          'direct_html_link_index': 0,
                          'html_links': html_links,
                          'file_links': fama_output['report_files'],
@@ -389,11 +390,12 @@ class FamaProfiling:
         # ctx is the context object
         # return variables are: output
         #BEGIN view_FamaFunctionalProfile
-        config = {'SDK_CALLBACK_URL':self.callback_url,
-                  'scratch':self.shared_folder
+        config = {'SDK_CALLBACK_URL': self.callback_url,
+                  'scratch': self.shared_folder
                   }
         importer = ProfileImporter(config)
-        output = importer.gen_func_profile_report(params['func_profile_ref'], params['workspace_name'])
+        output = importer.gen_func_profile_report(params['func_profile_ref'],
+                                                  params['workspace_name'])
         #END view_FamaFunctionalProfile
 
         # At some point might do deeper type checking...
@@ -402,6 +404,7 @@ class FamaProfiling:
                              'output is not type dict as required.')
         # return the results
         return [output]
+
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

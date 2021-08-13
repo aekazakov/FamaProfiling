@@ -278,5 +278,6 @@ def main():
     """Main function"""
     print('This program is not intended to run directly. Run fama.py instead.')
 
+
 if __name__ == '__main__':
     main()
