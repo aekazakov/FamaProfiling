@@ -45,6 +45,8 @@ def compose_run_info(project, name2ref, tab_index):
                           str(len(project.samples[sample_id].reads['pe1'])) +
                           '</p>')
         if project.samples[sample_id].is_paired_end:
+            if project.get_insert_size(project.samples[sample_id]) is None:
+                continue
             result.append('<p>Predicted average insert size: ' +
                           '{0:.0f}'.format(project.get_insert_size(project.samples[sample_id])) +
                           '</p>')
