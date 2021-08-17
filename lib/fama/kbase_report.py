@@ -270,7 +270,7 @@ def generate_html_report(outfile, project, name2ref):
         with open(html_template, 'r') as infile:
             for line in infile:
                 line = line.rstrip('\n\r')
-                if line == '<\InsertButtons>':
+                if line == r'<\InsertButtons>':
                     tab_counter = 1
                     of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
                              str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
@@ -297,7 +297,7 @@ def generate_html_report(outfile, project, name2ref):
                         report_tabs.append(compose_taxonomy_profile(project,
                                                                     sample_id,
                                                                     str(tab_counter)))
-                elif line == '<\InsertTabs>':
+                elif line == r'<\InsertTabs>':
                     of.write('\n'.join(report_tabs))
                 else:
                     of.write(line + '\n')
@@ -311,7 +311,7 @@ def generate_protein_html_report(outfile, project, name2ref):
         with open(html_template, 'r') as infile:
             for line in infile:
                 line = line.rstrip('\n\r')
-                if line == '<\InsertButtons>':
+                if line == r'<\InsertButtons>':
                     tab_counter = 1
                     of.write('<button class="tablinks" onclick="openTab(event, \'tab' +
                              str(tab_counter) + '\')" id="defaultOpen">Run info</button>')
@@ -350,7 +350,7 @@ def generate_protein_html_report(outfile, project, name2ref):
                                                                     sample_id,
                                                                     str(tab_counter),
                                                                     metric='proteincount'))
-                elif line == '<\InsertTabs>':
+                elif line == r'<\InsertTabs>':
                     of.write('\n'.join(report_tabs))
                 else:
                     of.write(line + '\n')
