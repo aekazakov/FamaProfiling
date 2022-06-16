@@ -1,5 +1,5 @@
 {
-    "ver": "1.0.1",
+    "ver": "1.1.1",
     "authors": [
         "kazakov"
     ],
@@ -32,19 +32,19 @@
               "options": [
                 {
                   "value": "nitrogen",
-                  "display": "Nitrogen cycle genes, v.1.4",
+                  "display": "Nitrogen cycle genes, v.1.5",
                   "id": "nitrogen",
                   "ui_name": "nitrogen"
                 },
                 {
                   "value": "universal",
-                  "display": "Universal single-copy marker genes, v.1.4",
+                  "display": "Universal single-copy marker genes, v.1.5",
                   "id": "universal",
                   "ui_name": "universal"
                 },
                 {
                   "value": "rpl6",
-                  "display": "Ribosomal protein L6, v.1.4",
+                  "display": "Ribosomal protein L6, v.1.5",
                   "id": "rpl6",
                   "ui_name": "rpl6"
                 },

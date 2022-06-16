@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Run Fama Read Profiling - v1.1
+name: Run Fama Read Profiling - v1.1.1
 
 tooltip: |
     Generate a functional profile of sequence read libraries with Fama
