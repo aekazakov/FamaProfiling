@@ -16,10 +16,11 @@ from fama.output.report import get_function_scores
 from fama.kbase_report import generate_html_report, generate_protein_html_report
 
 # How can I get reference data path from the server?
-refdata_dir = '/data/famaprofiling/1.4/'
+refdata_dir = '/data/famaprofiling/1.5/'
 ref_model_set_names = {'nitrogen': 'Fama_nitrogen_v.10.0_function_set',
                        'universal': 'Fama_universal_v.1.4_function_set',
-                       'rpl6': 'Fama_rpl6_v.1.2_function_set'}
+                       'rpl6': 'Fama_rpl6_v.1.2_function_set',
+                       'cazy': 'Fama_cazymes_v.2._function_set'}
 
 
 def pe_functional_profiling_pipeline(params):
@@ -326,23 +327,33 @@ microbecensus_data = {refdir}
 
 # Reference library for nitrogen cycle
 [nitrogen]
-functions_file = {refdir}/fama_nitrogen-cycle_v.10.0_functions_thresholds.tsv
-proteins_list_file = {refdir}/fama_nitrogen-cycle_v.10.0_proteins.txt
-taxonomy_file = {refdir}/fama_nitrogen-cycle_v.10.0_taxonomy.tsv
-reference_diamond_db = {refdir}/fama_nitrogen-cycle_preselection_db_v.10.0.dmnd
+functions_file = {refdir}/fama/nitrogen11/fama_nitrogen-cycle_v.11.0_functions_thresholds.tsv
+proteins_list_file = {refdir}/fama/nitrogen11/fama_nitrogen-cycle_v.11.0_proteins.txt
+taxonomy_file = {refdir}/fama/nitrogen11/fama_nitrogen-cycle_v.11.0_taxonomy.tsv
+reference_diamond_db = {refdir}/fama/nitrogen11/preselection_db_nr100.dmnd
 reference_db_size = 18388755
-background_diamond_db = {refdir}/fama_nitrogen-cycle_classification_db_v.10.0.dmnd
+background_diamond_db = {refdir}/fama/nitrogen11/classification_db_nr100.dmnd
 background_db_size = 64090197
 
 # Reference library for universal markers
 [universal]
-functions_file = {refdir}/fama_universal_functions_thresholds_v.1.4.txt
-proteins_list_file = {refdir}/fama_universal_proteins_v.1.4.txt
-taxonomy_file = {refdir}/fama_universal_taxonomy_v.1.4.txt
-reference_diamond_db = {refdir}/fama_universal-cycle_preselection_db_v.1.4.dmnd
+functions_file = {refdir}/fama/universal1.4/fama_function_thresholds_v.1.4.txt
+proteins_list_file = {refdir}/fama/universal1.4/fama_universal_v.1.4.txt
+taxonomy_file = {refdir}/fama/universal1.4/fama_universal_taxonomy_v.1.4.txt
+reference_diamond_db = {refdir}/fama/universal1.4/preselection_db_nr100.dmnd
 reference_db_size = 31895938
-background_diamond_db = {refdir}/fama_universal-cycle_classification_db_v.1.4.dmnd
+background_diamond_db = {refdir}/fama/universal1.4/classification_db_nr100.dmnd
 background_db_size = 49177580
+
+# Reference library for cazymes
+[cazy]
+functions_file = {refdir}/fama/cazy2/cazy_v2_functions.txt
+proteins_list_file = {refdir}/fama/cazy2/cazy_v2_proteins.txt
+taxonomy_file = {refdir}/fama/cazy2/cazy_v2_taxonomy.txt
+reference_diamond_db = {refdir}/fama/cazy2/preselection_database.dmnd
+reference_db_size = 238821857
+background_diamond_db = {refdir}/fama/cazy2/classification_database.dmnd
+background_db_size = 1308452213
 
 # Reference library for ribosomal protein L6
 [rpl6]

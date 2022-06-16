@@ -73,6 +73,7 @@ description : |
         <li>nitrogen cycle enzymes dataset for functional and taxonomic profiling of nitrate/nitrite/ammonia metabolic genes</li>
         <li>30 families of universal single-copy marker proteins from complete bacterial and archaeal genomes for taxonomic profiling and check for contamination</li>
         <li>Ribosomal protein L6 sequences from genomes of cultivated bacteria and metagenome-assembled genomes for fast taxonomic profiling.</li>
+        <li>Carbohydrate-active enzymes.</li>
     </ul>
     
     <p><strong>OUTPUT</strong></p>
