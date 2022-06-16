@@ -70,3 +70,8 @@
 ----
 * Added View Fama Functional Profile app
 * Added FunctionalProfile output to Run Fama Read Profiling 
+
+1.1.1
+----
+* Reference data update
+ 

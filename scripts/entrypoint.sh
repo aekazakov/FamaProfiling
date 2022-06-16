@@ -21,8 +21,8 @@ elif [ "${1}" = "init" ] ; then
   cd /data/famaprofiling/1.5
   pwd
 
-  echo "downloading protein reference databases: http://iseq.lbl.gov/mydocs/fama_downloads/fama_nitrogen.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/cgcms_fama_ref.tar.gz
+  echo "downloading protein reference databases: https://iseq.lbl.gov/mydocs/fama_downloads/cgcms_fama_ref.tar.gz"
+  curl -LJO -v -q https://iseq.lbl.gov/mydocs/fama_downloads/cgcms_fama_ref.tar.gz
   tar xvf /data/famaprofiling/1.5/cgcms_fama_ref.tar.gz
   rm /data/famaprofiling/1.5/cgcms_fama_ref.tar.gz
   cd /data/famaprofiling/1.5/fama/nitrogen11/
@@ -40,9 +40,11 @@ elif [ "${1}" = "init" ] ; then
   /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/1.5/fama/cazy2/classification_database.faa --db /data/famaprofiling/1.5/fama/cazy2/classification_database
   rm /data/famaprofiling/1.5/fama/cazy2/preselection_database.faa
   rm /data/famaprofiling/1.5/fama/cazy2/classification_database.faa
-  
-  echo "downloading ribosomal protein L6 database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_rpl6.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_rpl6.tar.gz
+
+
+  cd /data/famaprofiling/1.5
+  echo "downloading ribosomal protein L6 database: https://iseq.lbl.gov/mydocs/fama_downloads/fama_rpl6.tar.gz"
+  curl -LJO -q https://iseq.lbl.gov/mydocs/fama_downloads/fama_rpl6.tar.gz
   tar xvf /data/famaprofiling/1.5/fama_rpl6.tar.gz
   rm /data/famaprofiling/1.5/fama_rpl6.tar.gz
   /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/1.5/fama_rpl6_classification_db_v.1.2.faa --db /data/famaprofiling/1.5/fama_rpl6_classification_db_v.1.2
@@ -50,13 +52,13 @@ elif [ "${1}" = "init" ] ; then
   rm /data/famaprofiling/1.5/fama_rpl6_classification_db_v.1.2.faa
   rm /data/famaprofiling/1.5/fama_rpl6_preselection_db_v.1.2.faa
 
-  echo "downloading taxonomy database: http://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz
+  echo "downloading taxonomy database: https://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz"
+  curl -LJO -q https://iseq.lbl.gov/mydocs/fama_downloads/fama_taxonomy.tar.gz
   tar xvf /data/famaprofiling/1.5/fama_taxonomy.tar.gz
   rm /data/famaprofiling/1.5/fama_taxonomy.tar.gz
 
-  echo "downloading Microbe Census data: http://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz"
-  curl -LJO -q http://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz
+  echo "downloading Microbe Census data: https://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz"
+  curl -LJO -q https://iseq.lbl.gov/mydocs/fama_downloads/microbecensus_data.tar.gz
   tar xvf /data/famaprofiling/1.5/microbecensus_data.tar.gz
   rm /data/famaprofiling/1.5/microbecensus_data.tar.gz
   /kb/deployment/bin/diamond/diamond makedb --in /data/famaprofiling/1.5/seqs.fa --db /data/famaprofiling/1.5/seqs
